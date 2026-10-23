@@ -98,7 +98,6 @@ describe('App: continue a saved game', () => {
     const { root, app } = start();
     findButton(root, 'Nouvelle partie').click();
     findButton(root, "C'est parti").click();
-    findButton(root, 'Au magasin').click();
     findButton(root, 'Citrons (paquets) : plus').click();
     findButton(root, 'Acheter').click();
     const cash = app.store.get().game?.cash;
@@ -118,12 +117,10 @@ describe('App: continue a saved game', () => {
     const { root, app } = start();
     findButton(root, 'Nouvelle partie').click();
     findButton(root, "C'est parti").click();
-    findButton(root, 'Au magasin').click();
     for (const s of ['Citrons', 'Sucre', 'Glaçons', 'Gobelets']) {
       findButton(root, `${s} (paquets) : plus`).click();
     }
     findButton(root, 'Acheter').click();
-    findButton(root, 'Ma recette').click();
     findButton(root, 'Ouvrir le stand').click();
     expect(app.store.get().game?.phase).toBe('JOURNEE');
 
@@ -143,10 +140,9 @@ describe('App: first-day tutorial', () => {
 
     findButton(root, 'Nouvelle partie').click();
     findButton(root, "C'est parti").click();
-    expect(root.textContent).toContain('Étape 1 sur 4');
-    findButton(root, 'Au magasin').click();
-    expect(root.textContent).toContain('Étape 2 sur 4');
-    expect(root.textContent).toContain('il te faut 8 citrons');
+    // Each pane of the dashboard carries its step on day 1.
+    for (const n of [1, 2, 3, 4]) expect(root.textContent).toContain(`Étape ${n} sur 5`);
+    expect(root.textContent).toContain('Pour 2 pichets : 8 🍋');
 
     findButton(root, 'Retour à l’accueil').click();
     findButton(root, 'Conseils de Citronnelle : oui').click();
@@ -154,6 +150,6 @@ describe('App: first-day tutorial', () => {
     expect(loadPreferences().conseils).toBe(false);
 
     findButton(root, 'Continuer la partie').click();
-    expect(root.textContent).not.toContain('Étape 2 sur 4');
+    expect(root.textContent).not.toContain('Étape 2 sur 5');
   });
 });

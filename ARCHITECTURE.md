@@ -440,6 +440,20 @@ The total profit is shown green when positive and red when negative, always with
 | **Historique** | A simple table with one row per day (météo prévue/réelle, prix, recette, verres vendus, bénéfice, caisse), plus small line charts of cash, profit per day, and supply prices (lightweight SVG drawn by hand, no chart library) |
 | **Fin** | Score « 💰 Tu termines avec 48,20 $ ! », then **« 📈 Bénéfice total : +28,20 $ »** with the kid‑friendly equation « Caisse de départ + Bénéfice = Caisse finale + Stock qu'il te reste ». Also the totals summary (spec §9), best day by profit, the day‑by‑day table, a fun, gender‑neutral title by score (« Graine de citronnier », « As du stand », « Pro de la limonade », « Star de la limonade »), the early‑end explanation if needed, and « Rejouer » |
 
+### 10.3b Planning dashboard (current layout)
+
+Planning no longer moves through separate Météo → Magasin → Recette screens. One **dashboard** (`src/ui/screens/PreparationScreen.ts`) shows independent panes around the 3D stand, all at once:
+
+| Where | Pane | Contents |
+| --- | --- | --- |
+| Top left | 📦 Ton stock (`ui/hud/StockPanel.ts`) | A number and a bar per supply, nothing else; live during the selling day |
+| Top right | ☀️ La météo de demain (`ui/panes/WeatherPane.ts`) | Forecast, traffic outlook, market news; about 25 % smaller than the old panel |
+| Bottom, 1st | 🍋 Ta recette (`ui/panes/RecipePane.ts`) | Lemons, sugar and ice per pitcher, number of pitchers, « Il te faut » needs vs stock |
+| Bottom, 2nd | 🛒 Le magasin (`ui/panes/ShopPane.ts`) | One row per supply: price and trend, packages to buy, cart and « Acheter » |
+| Bottom, 3rd | 🏷️ Ton prix (`ui/panes/PricePane.ts`) | Price per cup, cost and gain per cup, cost and profit if all planned glasses sell, « Ouvrir le stand ! » |
+
+The camera zooms out and lifts the stand above the bottom row. On day 1 each pane shows one short tutorial line. Below 900 px the panes stack and the screen scrolls. The report, history and end screens keep the right-hand panel.
+
 ### 10.4 Vocabulary (consistent French terms)
 
 | Concept | French label |

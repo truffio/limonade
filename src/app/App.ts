@@ -1,9 +1,8 @@
 import type { GameConfig } from '../config/schema';
-import { finishDay, goToPhase } from '../core/actions';
+import { finishDay } from '../core/actions';
 import type { ActionResult, GameState, Phase } from '../core/types';
 import { newGame } from '../core/game';
 import { fr } from '../i18n/fr';
-import { renderRecipePanel, RECIPE_SCREENS } from '../ui/hud/RecipePanel';
 import { renderStockPanel, STOCK_SCREENS } from '../ui/hud/StockPanel';
 import { renderTopBar } from '../ui/hud/TopBar';
 import { screens } from '../ui/screens';
@@ -21,19 +20,14 @@ import {
 } from './persistence';
 import { createStore, type Store } from './store';
 
+/** All planning phases share one dashboard screen with independent panes. */
 export const PHASE_SCREEN: Record<Phase, ScreenId> = {
-  METEO: 'meteo',
-  MAGASIN: 'magasin',
-  RECETTE: 'recette',
+  METEO: 'preparation',
+  MAGASIN: 'preparation',
+  RECETTE: 'preparation',
   JOURNEE: 'journee',
   BILAN: 'bilan',
   FIN: 'fin',
-};
-
-const SCREEN_PHASE: Partial<Record<ScreenId, Phase>> = {
-  meteo: 'METEO',
-  magasin: 'MAGASIN',
-  recette: 'RECETTE',
 };
 
 /** Screens without the top bar: the title screen, and the day itself, which shows live counters. */
@@ -115,12 +109,6 @@ export class App {
   }
 
   goTo(screen: ScreenId): void {
-    const state = this.store.get();
-    const phase = SCREEN_PHASE[screen];
-    if (phase && state.game && state.game.phase !== phase) {
-      this.act((game) => goToPhase(game, phase));
-      return;
-    }
     this.setScreen(screen);
   }
 
@@ -213,15 +201,10 @@ export class App {
     const ctx = this.context();
     const content = screens[state.screen].render(ctx);
     const topBar = state.game && !WITHOUT_TOP_BAR.has(state.screen) ? renderTopBar(ctx) : null;
-    // Left side: the stock (#45) and, while planning, the recipe summary (#50).
+    // Top left: the stock (#45), live during the day.
     const side =
       state.game && STOCK_SCREENS.has(state.screen)
-        ? h(
-            'div',
-            { class: 'cote' },
-            renderStockPanel(ctx),
-            RECIPE_SCREENS.has(state.screen) ? renderRecipePanel(ctx) : null,
-          )
+        ? h('div', { class: 'cote' }, renderStockPanel(ctx))
         : null;
 
     // Animate only when arriving on a screen, not on every re-render of the same one.

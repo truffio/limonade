@@ -3,8 +3,7 @@ import type { GameConfig } from '../../config/schema';
 import type { Cart } from '../../core/actions';
 import type { ActionResult, GameState } from '../../core/types';
 
-export type ScreenId =
-  'accueil' | 'meteo' | 'magasin' | 'recette' | 'journee' | 'bilan' | 'historique' | 'fin';
+export type ScreenId = 'accueil' | 'preparation' | 'journee' | 'bilan' | 'historique' | 'fin';
 
 /** Screen-only state that is not part of the game rules. */
 export interface UiState {

@@ -47,8 +47,11 @@ describe('App (full flow in French)', () => {
   it('plays a whole day: shop, recipe, open, skip, report, next day', () => {
     click(root, 'Nouvelle partie');
     click(root, "C'est parti");
-    click(root, 'Au magasin');
-    expect(root.textContent).toContain('Le magasin');
+    // Planning is one dashboard: every pane is on screen at once.
+    for (const title of ['La météo de demain', 'Le magasin', 'Ta recette', 'Ton prix']) {
+      expect(root.textContent).toContain(title);
+    }
+    expect(root.querySelector('.ecran--preparation .rangee')).not.toBeNull();
 
     // Nothing in the cart yet: buying is disabled.
     expect(findButton(root, 'Acheter').disabled).toBe(true);
@@ -66,9 +69,8 @@ describe('App (full flow in French)', () => {
       '6',
     );
 
-    click(root, 'Ma recette');
-    expect(root.textContent).toContain('Ta recette');
-    expect(root.textContent).toContain('Un verre te coûte environ');
+    expect(root.textContent).toContain('Coût d’un verre');
+    expect(root.textContent).toContain('Si tu vends les 8 verres');
     click(root, 'Ouvrir le stand');
     expect(app.store.get().game?.phase).toBe('JOURNEE');
     expect(root.textContent).toContain('Verres vendus');
@@ -92,7 +94,6 @@ describe('App (full flow in French)', () => {
   it('prevents buying more than the cash allows', () => {
     click(root, 'Nouvelle partie');
     click(root, "C'est parti");
-    click(root, 'Au magasin');
     const plus = () => findButton(root, 'Citrons (paquets) : plus');
     let guard = 0;
     while (!plus().disabled && guard++ < 50) plus().click();
@@ -105,8 +106,6 @@ describe('App (full flow in French)', () => {
   it('refuses to open without ingredients and explains why', () => {
     click(root, 'Nouvelle partie');
     click(root, "C'est parti");
-    click(root, 'Au magasin');
-    click(root, 'Ma recette');
     expect(findButton(root, 'Ouvrir le stand').disabled).toBe(true);
     expect(root.textContent).toContain('Il en manque');
   });
@@ -114,7 +113,6 @@ describe('App (full flow in French)', () => {
   it('keeps keyboard focus on a stepper button after it re-renders', () => {
     click(root, 'Nouvelle partie');
     click(root, "C'est parti");
-    click(root, 'Au magasin');
     const plus = findButton(root, 'Sucre (paquets) : plus');
     plus.focus();
     plus.click();
