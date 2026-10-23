@@ -12,6 +12,8 @@ export interface UiState {
   dureeChoisie: number | null;
   aideOuverte: boolean;
   explicationOuverte: boolean;
+  /** Citronnelle's step-by-step tips on the first day (saved as a preference). */
+  conseils: boolean;
 }
 
 export interface AppState {
@@ -32,6 +34,10 @@ export interface ScreenContext {
   setCart(cart: Cart): void;
   setUi(patch: Partial<UiState>): void;
   startGame(days: number): void;
+  /** The game that « Continuer » would resume, if any. */
+  savedGame(): GameState | null;
+  resume(): void;
+  /** Back to the title screen; the game stays saved. */
   quit(): void;
   toast(text: string, tone?: 'ok' | 'erreur'): void;
   /** Publishes a UI click for listeners such as the future sound module. */

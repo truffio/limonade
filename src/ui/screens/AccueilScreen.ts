@@ -9,6 +9,7 @@ export const AccueilScreen: Screen = {
   render(ctx) {
     const { days } = ctx.cfg.game;
     const chosen = ctx.state.ui.dureeChoisie;
+    const saved = chosen === null ? ctx.savedGame() : null;
 
     const help = ctx.state.ui.aideOuverte
       ? h(
@@ -72,18 +73,33 @@ export const AccueilScreen: Screen = {
         h(
           'div',
           { class: 'accueil__boutons' },
+          saved
+            ? button(fr.accueil.continuer(saved.day, saved.totalDays), () => ctx.resume(), {
+                large: true,
+                focusKey: 'continuer',
+              })
+            : null,
           button(
             fr.commun.nouvellePartie,
             () => {
               ctx.click('nouvelle-partie');
               ctx.setUi({ dureeChoisie: days.default });
             },
-            { large: true, focusKey: 'nouvelle-partie' },
+            {
+              large: !saved,
+              variant: saved ? 'secondary' : 'primary',
+              focusKey: 'nouvelle-partie',
+            },
           ),
           button(
             fr.commun.commentJouer,
             () => ctx.setUi({ aideOuverte: !ctx.state.ui.aideOuverte }),
             { variant: 'secondary', focusKey: 'aide' },
+          ),
+          button(
+            fr.accueil.conseils(ctx.state.ui.conseils),
+            () => ctx.setUi({ conseils: !ctx.state.ui.conseils }),
+            { variant: 'ghost', focusKey: 'conseils' },
           ),
         ),
       help,

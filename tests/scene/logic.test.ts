@@ -78,3 +78,13 @@ describe('scene logic', () => {
     expect(freeSlot([true, true])).toBeNull();
   });
 });
+
+describe('camera field of view', async () => {
+  const { fovForAspect } = await import('../../src/scene/SceneManager');
+
+  it('keeps the normal view on wide screens and widens it on tall ones', () => {
+    expect(fovForAspect(16 / 9)).toBe(35);
+    expect(fovForAspect(0.75)).toBeGreaterThan(35);
+    expect(fovForAspect(0.46)).toBeLessThanOrEqual(62);
+  });
+});

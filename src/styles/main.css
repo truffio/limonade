@@ -985,3 +985,53 @@ summary:focus-visible {
     transition: none !important;
   }
 }
+
+/* ---------- Polish: entrances and the tutorial ---------- */
+
+.ecran--entree > .panneau,
+.ecran--entree > .card {
+  animation: entree-cote 0.28s ease-out;
+}
+
+.ecran--entree > .journee {
+  animation: entree-bas 0.28s ease-out;
+}
+
+@keyframes entree-cote {
+  from {
+    transform: translateX(28px);
+    opacity: 0;
+  }
+}
+
+@keyframes entree-bas {
+  from {
+    transform: translateY(28px);
+    opacity: 0;
+  }
+}
+
+.mascotte--tuto .mascotte__bulle {
+  border: 3px solid var(--citron);
+  background: #fffbe6;
+  animation: tuto 1.6s ease-in-out 2;
+}
+
+.mascotte--tuto .mascotte__bulle::before {
+  border-right-color: var(--citron);
+}
+
+@keyframes tuto {
+  50% {
+    box-shadow: 0 0 0 6px rgb(255 217 61 / 0.45);
+  }
+}
+
+.barre > .btn:first-child {
+  min-height: 40px;
+  min-width: 40px;
+  margin-left: 0;
+  font-size: 1.3rem;
+  padding: 0 6px;
+  text-decoration: none;
+}

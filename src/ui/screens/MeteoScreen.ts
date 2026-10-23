@@ -1,7 +1,7 @@
 import type { TrafficOutlook } from '../../core/types';
 import { percent, temp } from '../../i18n/format';
 import { fr } from '../../i18n/fr';
-import { actions, button, mascot, screenTitle } from '../components';
+import { actions, button, mascot, screenTitle, tutorialTip } from '../components';
 import { h } from '../dom';
 import { forecastIcon } from '../weather';
 import { marketNewsLines } from './MagasinScreen';
@@ -20,6 +20,7 @@ export const MeteoScreen: Screen = {
       'section',
       { class: 'panneau' },
       screenTitle(fr.ecrans.meteo),
+      tutorialTip(ctx, 1, fr.tutoriel.meteo),
       h(
         'div',
         { class: 'meteo' },

@@ -1,5 +1,5 @@
 import type { GameConfig } from '../config/schema';
-import { goToPhase } from '../core/actions';
+import { finishDay, goToPhase } from '../core/actions';
 import type { ActionResult, GameState, Phase } from '../core/types';
 import { newGame } from '../core/game';
 import { fr } from '../i18n/fr';
@@ -8,6 +8,7 @@ import { screens } from '../ui/screens';
 import type { AppState, ScreenContext, ScreenId } from '../ui/screens/types';
 import { h } from '../ui/dom';
 import { EventBus, type GameEvents } from './events';
+import { clearSave, loadGame, loadPreferences, saveGame, savePreferences } from './persistence';
 import { createStore, type Store } from './store';
 
 export const PHASE_SCREEN: Record<Phase, ScreenId> = {
@@ -30,13 +31,18 @@ const WITHOUT_TOP_BAR: ReadonlySet<ScreenId> = new Set(['accueil', 'journee']);
 
 const TOAST_MS = 2500;
 
-export function initialState(): AppState {
+export function initialState(conseils = true): AppState {
   return {
     screen: 'accueil',
     game: null,
     cart: {},
-    ui: { dureeChoisie: null, aideOuverte: false, explicationOuverte: false },
+    ui: { dureeChoisie: null, aideOuverte: false, explicationOuverte: false, conseils },
   };
+}
+
+export interface AppOptions {
+  /** Identifies the config; saves made with another config are ignored. */
+  configFingerprint?: string;
 }
 
 /** Wires the core, the screens and the event bus together (ARCHITECTURE.md §4). */
@@ -46,19 +52,51 @@ export class App {
   private cleanups: (() => void)[] = [];
   private readonly screenRoot = h('div', { class: 'ui__ecran' });
   private readonly toastRoot = h('div', { class: 'ui__toasts', 'aria-live': 'polite' });
+  private readonly configFingerprint: string;
+  private lastScreen: ScreenId | null = null;
 
   constructor(
     private readonly uiRoot: HTMLElement,
     readonly config: GameConfig,
-    initial: AppState = initialState(),
+    options: AppOptions = {},
   ) {
-    this.store = createStore(initial);
+    this.configFingerprint = options.configFingerprint ?? 'dev';
+    this.store = createStore(initialState(loadPreferences().conseils));
   }
 
   start(): void {
     this.uiRoot.replaceChildren(this.screenRoot, this.toastRoot);
-    this.store.subscribe(() => this.render());
+    this.store.subscribe((state) => {
+      this.persist(state);
+      this.render();
+    });
     this.render();
+  }
+
+  /** The saved game that can be continued, if any (only while no game is open). */
+  savedGame(): GameState | null {
+    return this.store.get().game ? null : loadGame(this.configFingerprint);
+  }
+
+  /** Continues the saved game. A day interrupted mid-replay resumes on its report. */
+  resume(): void {
+    const saved = loadGame(this.configFingerprint);
+    if (!saved) return;
+    let game = saved;
+    if (game.phase === 'JOURNEE') {
+      const finished = finishDay(game);
+      if (finished.ok) game = finished.state;
+    }
+    const screen = PHASE_SCREEN[game.phase];
+    this.store.set({ ...initialState(this.store.get().ui.conseils), screen, game });
+    this.events.emit('screen_change', { from: 'accueil', to: screen });
+  }
+
+  private persist(state: AppState): void {
+    savePreferences({ conseils: state.ui.conseils });
+    if (!state.game) return;
+    if (state.game.phase === 'FIN') clearSave();
+    else saveGame(state.game, this.configFingerprint);
   }
 
   goTo(screen: ScreenId): void {
@@ -75,7 +113,7 @@ export class App {
     const seed = (Date.now() ^ Math.floor(Math.random() * 0x7fffffff)) | 0;
     const game = newGame(this.config, { seed, days });
     this.store.set({
-      ...initialState(),
+      ...initialState(this.store.get().ui.conseils),
       screen: PHASE_SCREEN[game.phase],
       game,
     });
@@ -137,7 +175,9 @@ export class App {
         this.store.set({ ...current, ui: { ...current.ui, ...patch } });
       },
       startGame: (days) => this.startGame(days),
-      quit: () => this.store.set(initialState()),
+      savedGame: () => this.savedGame(),
+      resume: () => this.resume(),
+      quit: () => this.store.set(initialState(this.store.get().ui.conseils)),
       toast: (text, tone) => this.toast(text, tone),
       click: (id) => this.events.emit('button_click', { id }),
       onCleanup: (fn) => this.cleanups.push(fn),
@@ -159,9 +199,16 @@ export class App {
     const content = screens[state.screen].render(ctx);
     const topBar = state.game && !WITHOUT_TOP_BAR.has(state.screen) ? renderTopBar(ctx) : null;
 
+    // Animate only when arriving on a screen, not on every re-render of the same one.
+    const entering = state.screen !== this.lastScreen;
+    this.lastScreen = state.screen;
     this.screenRoot.replaceChildren(
       ...(topBar ? [topBar] : []),
-      h('div', { class: `ecran ecran--${state.screen}` }, content),
+      h(
+        'div',
+        { class: `ecran ecran--${state.screen}${entering ? ' ecran--entree' : ''}` },
+        content,
+      ),
     );
     this.uiRoot.dataset['screen'] = state.screen;
 
