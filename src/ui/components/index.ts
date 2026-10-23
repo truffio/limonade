@@ -35,7 +35,10 @@ export function button(
 
 export interface StepperOptions {
   id: string;
+  /** Full label: shown, and used for the « − » / « + » button names read by screen readers. */
   label: string;
+  /** Shorter visible label when the context already says what it is (e.g. « Paquets » in a card). */
+  shortLabel?: string;
   icon?: string;
   value: number;
   min: number;
@@ -43,6 +46,8 @@ export interface StepperOptions {
   step?: number;
   format?: (value: number) => string;
   hint?: Child;
+  /** One row: label on the left, « − value + » on the right (issue #44: no scrolling). */
+  compact?: boolean;
   onChange: (value: number) => void;
 }
 
@@ -51,10 +56,16 @@ export function stepper(o: StepperOptions): HTMLElement {
   const step = o.step ?? 1;
   const format = o.format ?? String;
   const set = (value: number) => o.onChange(Math.min(o.max, Math.max(o.min, value)));
+  const label = h(
+    'div',
+    { class: 'stepper__label', id: `${o.id}-label` },
+    h('span', null, o.icon ? `${o.icon} ` : '', o.shortLabel ?? o.label),
+    o.compact && o.hint ? h('small', { class: 'stepper__hint' }, o.hint) : null,
+  );
   return h(
     'div',
-    { class: 'stepper' },
-    h('div', { class: 'stepper__label', id: `${o.id}-label` }, o.icon ? `${o.icon} ` : '', o.label),
+    { class: `stepper${o.compact ? ' stepper--compact' : ''}` },
+    label,
     h(
       'div',
       { class: 'stepper__controls', role: 'group', 'aria-labelledby': `${o.id}-label` },
@@ -72,7 +83,7 @@ export function stepper(o: StepperOptions): HTMLElement {
         label: `${o.label} : plus`,
       }),
     ),
-    o.hint ? h('div', { class: 'stepper__hint' }, o.hint) : null,
+    !o.compact && o.hint ? h('div', { class: 'stepper__hint' }, o.hint) : null,
   );
 }
 
@@ -111,9 +122,19 @@ export function screenTitle(text: string): HTMLElement {
   return h('h1', { class: 'ecran__titre' }, text);
 }
 
-/** Bottom row of navigation buttons. */
+/** Bottom row of navigation buttons, pinned to the bottom of the panel so it never scrolls away. */
 export function actions(...buttons: (HTMLElement | null)[]): HTMLElement {
   return h('div', { class: 'ecran__actions' }, buttons);
+}
+
+/** Two columns on wide panels, one on phones (issue #44). */
+export function columns(left: Child[], right: Child[]): HTMLElement {
+  return h(
+    'div',
+    { class: 'colonnes' },
+    h('div', { class: 'colonnes__col' }, left),
+    h('div', { class: 'colonnes__col' }, right),
+  );
 }
 
 /**

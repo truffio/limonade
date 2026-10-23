@@ -16,7 +16,9 @@ const PANEL_SCREENS: ReadonlySet<ScreenId> = new Set([
   'historique',
   'fin',
 ]);
-const PANEL_WIDTH = 632;
+/** Right panel width plus its margins (see `.panneau` in main.css). */
+const PANEL_WIDTH = 672;
+const MAX_PANEL_SHARE = 0.7;
 const WIDE_SCREEN = 900;
 const DAY_PANEL_SHARE = 0.12;
 
@@ -50,7 +52,7 @@ export class SceneDirector {
     const width = window.innerWidth;
     const x =
       PANEL_SCREENS.has(screen) && width >= WIDE_SCREEN
-        ? Math.min(PANEL_WIDTH, width / 2) / width
+        ? Math.min(MAX_PANEL_SHARE, PANEL_WIDTH / width)
         : 0;
     // During the day, the live counters cover the bottom of the screen.
     const y = screen === 'journee' ? DAY_PANEL_SHARE : 0;

@@ -53,7 +53,7 @@ function supplyCard(ctx: ScreenContext, supply: SupplyId): HTMLElement {
       h('span', { class: 'fourniture__icone', 'aria-hidden': 'true' }, info.icone),
       h(
         'div',
-        null,
+        { class: 'fourniture__nom' },
         h('h2', null, info.nom),
         h('small', null, fr.magasin.paquet(s.package_quantity, s.unit)),
       ),
@@ -65,36 +65,35 @@ function supplyCard(ctx: ScreenContext, supply: SupplyId): HTMLElement {
       ),
     ),
     h(
-      'p',
+      'div',
       { class: 'fourniture__stock' },
-      fr.magasin.enStock(count(game.inventory, supply)),
-      expiring > 0
-        ? h('span', { class: 'avertissement' }, ` ${fr.magasin.pourrissent(expiring)}`)
+      h('span', null, fr.magasin.enStock(count(game.inventory, supply))),
+      history.length > 1
+        ? h(
+            'details',
+            { class: 'fourniture__historique' },
+            h('summary', { 'aria-label': fr.magasin.evolution, title: fr.magasin.evolution }, '📈'),
+            lineChart(
+              fr.magasin.evolution,
+              [{ label: info.nom, color: 'var(--ciel)', values: history.map((c) => c / 100) }],
+              (v) => money(Math.round(v * 100)),
+              history.map((_, i) => `J${i + 1}`),
+            ),
+          )
         : null,
     ),
+    expiring > 0 ? h('small', { class: 'avertissement' }, fr.magasin.pourrissent(expiring)) : null,
     stepper({
       id: `achat-${supply}`,
       label: `${info.nom} (paquets)`,
-      icon: info.icone,
+      shortLabel: fr.magasin.paquets,
       value: packages,
       min: 0,
       max: Math.max(packages, maxPackages),
       hint: packages > 0 ? `= ${money(packages * price)}` : null,
+      compact: true,
       onChange: (n) => ctx.setCart({ ...cart, [supply]: n }),
     }),
-    history.length > 1
-      ? h(
-          'details',
-          { class: 'fourniture__historique' },
-          h('summary', null, fr.magasin.evolution),
-          lineChart(
-            fr.magasin.evolution,
-            [{ label: info.nom, color: 'var(--ciel)', values: history.map((c) => c / 100) }],
-            (v) => money(Math.round(v * 100)),
-            history.map((_, i) => `J${i + 1}`),
-          ),
-        )
-      : null,
   );
 }
 
@@ -114,20 +113,22 @@ export const MagasinScreen: Screen = {
       }
     };
 
+    const tip = tutorialTip(
+      ctx,
+      2,
+      fr.tutoriel.magasin(
+        2 * ctx.cfg.recipe.lemons_per_pitcher.default,
+        2 * ctx.cfg.recipe.sugar_per_pitcher.default,
+        2 * ctx.cfg.recipe.ice_per_pitcher.default,
+        2 * ctx.cfg.recipe.servings_per_pitcher,
+      ),
+    );
+
     return h(
       'section',
       { class: 'panneau' },
       screenTitle(fr.ecrans.magasin),
-      tutorialTip(
-        ctx,
-        2,
-        fr.tutoriel.magasin(
-          2 * ctx.cfg.recipe.lemons_per_pitcher.default,
-          2 * ctx.cfg.recipe.sugar_per_pitcher.default,
-          2 * ctx.cfg.recipe.ice_per_pitcher.default,
-          2 * ctx.cfg.recipe.servings_per_pitcher,
-        ),
-      ),
+      tip ?? mascot(fr.magasin.conseil),
       news.length > 0
         ? h(
             'div',
@@ -141,27 +142,33 @@ export const MagasinScreen: Screen = {
         SUPPLIES.map((supply) => supplyCard(ctx, supply)),
       ),
       h(
-        'div',
-        { class: 'panier' },
-        h('div', null, `${fr.magasin.total} : `, h('strong', null, money(total))),
-        h('div', null, `${fr.magasin.caisse} : `, h('strong', null, money(game.cash))),
-        button(`🛒 ${fr.magasin.acheter}`, buy, {
-          large: true,
-          disabled: empty || total > game.cash,
-          focusKey: 'acheter',
-        }),
-        empty ? h('small', null, fr.magasin.panierVide) : null,
-      ),
-      mascot(fr.magasin.conseil),
-      actions(
-        button(fr.magasin.retourMeteo, () => ctx.goTo('meteo'), {
-          variant: 'secondary',
-          focusKey: 'vers-meteo',
-        }),
-        button(fr.magasin.vaALaRecette, () => ctx.goTo('recette'), {
-          large: true,
-          focusKey: 'vers-recette',
-        }),
+        'footer',
+        { class: 'ecran__pied' },
+        h(
+          'div',
+          { class: 'panier' },
+          h(
+            'div',
+            { class: 'panier__totaux' },
+            empty
+              ? h('small', null, fr.magasin.panierVide)
+              : h('span', null, `${fr.magasin.total} : `, h('strong', null, money(total))),
+            h('span', null, `${fr.magasin.caisse} : `, h('strong', null, money(game.cash))),
+          ),
+          button(`🛒 ${fr.magasin.acheter}`, buy, {
+            disabled: empty || total > game.cash,
+            focusKey: 'acheter',
+          }),
+        ),
+        actions(
+          button(fr.magasin.retourMeteo, () => ctx.goTo('meteo'), {
+            variant: 'secondary',
+            focusKey: 'vers-meteo',
+          }),
+          button(fr.magasin.vaALaRecette, () => ctx.goTo('recette'), {
+            focusKey: 'vers-recette',
+          }),
+        ),
       ),
     );
   },

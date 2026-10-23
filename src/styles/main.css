@@ -1061,3 +1061,395 @@ summary:focus-visible {
   gap: 10px;
   padding: 8px 0 6px;
 }
+
+/* ---------- Dense panels (issue #44): planning screens fit without scrolling ---------- */
+
+/* The panel scrolls on its own if it ever has to, and its footer stays pinned. */
+.ecran:not(.ecran--accueil) {
+  overflow: hidden;
+}
+
+.panneau {
+  width: min(100%, 640px);
+  max-height: 100%;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 16px 20px 0;
+  gap: 10px;
+}
+
+.ecran__titre {
+  font-size: 1.45rem;
+}
+
+.ecran__actions,
+.ecran__pied {
+  position: sticky;
+  bottom: 0;
+  z-index: 1;
+  margin-top: auto;
+  background: linear-gradient(rgb(255 248 231 / 0), var(--creme) 14px);
+  padding: 12px 0 14px;
+}
+
+.ecran__pied {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ecran__pied .ecran__actions {
+  position: static;
+  padding: 0;
+  background: none;
+}
+
+.ecran__pied > .avertissement {
+  font-size: 0.9rem;
+}
+
+.btn {
+  min-height: 46px;
+  padding: 8px 18px;
+  font-size: 1.05rem;
+}
+
+.btn--large {
+  min-height: 54px;
+  padding: 10px 26px;
+  font-size: 1.2rem;
+}
+
+.colonnes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  align-items: start;
+}
+
+.colonnes__col {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+/* Compact mascot */
+.mascotte {
+  gap: 10px;
+  font-size: 0.92rem;
+}
+
+.mascotte__avatar {
+  width: 42px;
+  height: 42px;
+  font-size: 1.5rem;
+}
+
+.mascotte__bulle {
+  padding: 8px 12px;
+  gap: 4px;
+}
+
+.mascotte__bulle::before {
+  top: 12px;
+}
+
+/* Compact steppers: label on the left, « − value + » on the right, one 44 px row. */
+.stepper--compact {
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.stepper--compact .stepper__label {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  font-size: 0.95rem;
+  line-height: 1.2;
+}
+
+.stepper--compact .stepper__controls {
+  gap: 6px;
+  flex: none;
+}
+
+.stepper--compact .stepper__controls .btn {
+  width: 44px;
+  height: 44px;
+  min-height: 44px;
+  min-width: 44px;
+  font-size: 1.4rem;
+  box-shadow: 0 3px 0 rgb(0 0 0 / 0.15);
+}
+
+.stepper--compact .stepper__value {
+  min-width: 52px;
+  font-size: 1.2rem;
+}
+
+.stepper--compact .stepper__hint {
+  font-size: 0.8rem;
+}
+
+/* Weather: forecast and outlook side by side */
+.meteo {
+  padding: 12px;
+  gap: 12px;
+}
+
+.meteo__icone {
+  font-size: 3.4rem;
+}
+
+.meteo__temperature {
+  font-size: 2rem;
+}
+
+.meteo__pluie {
+  font-size: 0.9rem;
+}
+
+.colonnes .affluence {
+  gap: 6px;
+}
+
+.colonnes .affluence__choix {
+  grid-template-columns: 1fr;
+  gap: 6px;
+}
+
+.colonnes .affluence__niveau {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 10px;
+  text-align: left;
+}
+
+.colonnes .affluence__visage {
+  font-size: 1.6rem;
+}
+
+.nouvelles {
+  padding: 8px 12px;
+  font-size: 0.95rem;
+}
+
+/* Shop: 2 × 2 grid of compact cards */
+.fournitures {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.fourniture {
+  padding: 10px 12px;
+  gap: 6px;
+}
+
+.fourniture__entete {
+  gap: 8px;
+}
+
+.fourniture__icone {
+  font-size: 1.7rem;
+}
+
+.fourniture__nom {
+  min-width: 0;
+}
+
+.fourniture__entete h2 {
+  font-size: 1.05rem;
+}
+
+.fourniture__entete small {
+  font-size: 0.75rem;
+}
+
+.fourniture__prix {
+  font-size: 1.05rem;
+}
+
+.fourniture__prix small {
+  font-size: 0.72rem;
+}
+
+.fourniture__stock {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  font-size: 0.88rem;
+}
+
+.fourniture__historique {
+  margin-left: auto;
+}
+
+.fourniture__historique[open] {
+  flex-basis: 100%;
+  margin-left: 0;
+}
+
+.fourniture__historique summary {
+  list-style: none;
+  font-size: 1.1rem;
+  min-width: 32px;
+  text-align: center;
+}
+
+.fourniture__historique summary::-webkit-details-marker {
+  display: none;
+}
+
+.fourniture > .avertissement {
+  font-size: 0.8rem;
+}
+
+.panier {
+  padding: 8px 12px;
+  gap: 8px 16px;
+}
+
+.panier {
+  flex-wrap: nowrap;
+}
+
+.panier__totaux {
+  flex: 1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 16px;
+}
+
+.panier__totaux small {
+  flex-basis: auto;
+}
+
+.ecran__raison {
+  flex: 1;
+  text-align: center;
+  font-size: 0.85rem;
+}
+
+.recette .avertissement,
+.colonnes .avertissement {
+  font-size: 0.88rem;
+}
+
+/* Recipe: the pitcher preview sits beside the heading */
+.recette__entete {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.recette__pichet {
+  width: 64px;
+  flex: none;
+}
+
+.recette__max {
+  color: var(--texte-doux);
+  font-size: 0.82rem;
+  margin-top: -4px;
+}
+
+.recette__verres {
+  font-size: 0.92rem;
+}
+
+.liste-courses th,
+.liste-courses td {
+  padding: 4px 8px;
+  font-size: 0.9rem;
+}
+
+.prix {
+  padding: 10px 12px;
+  gap: 6px;
+}
+
+.prix__ligne {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px 12px;
+}
+
+.prix__ligne .stepper {
+  flex: 1 1 260px;
+}
+
+.prix__rapides .btn {
+  min-height: 44px;
+  padding: 4px 12px;
+  font-size: 0.95rem;
+}
+
+.prix__marge {
+  font-size: 0.9rem;
+}
+
+/* Report */
+.benefice {
+  padding: 12px;
+  gap: 4px;
+}
+
+.benefice__valeur {
+  font-size: 2.3rem;
+}
+
+.benefice__calcul {
+  font-size: 0.85rem;
+}
+
+.benefice .btn--ghost {
+  min-height: 44px;
+  font-size: 0.9rem;
+}
+
+.colonnes .tuiles {
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.tuile {
+  padding: 8px 6px;
+}
+
+.tuile__valeur {
+  font-size: 1.25rem;
+}
+
+.tuile__label {
+  font-size: 0.8rem;
+}
+
+.bilan__bloc {
+  gap: 2px;
+  font-size: 0.9rem;
+}
+
+.bilan__bloc h2 {
+  font-size: 1rem;
+}
+
+@media (max-width: 640px) {
+  .colonnes,
+  .fournitures,
+  .colonnes .tuiles {
+    grid-template-columns: 1fr;
+  }
+
+  .colonnes .tuiles {
+    grid-template-columns: 1fr 1fr;
+  }
+}
