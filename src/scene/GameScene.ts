@@ -58,7 +58,7 @@ export class GameScene {
     this.crowd.clear();
   }
 
-  setFocusShift(x: number, y = 0): void {
-    this.manager.setFocusShift(x, y);
+  setFocusShift(x: number, y = 0, zoom = 1): void {
+    this.manager.setFocusShift(x, y, zoom);
   }
 }

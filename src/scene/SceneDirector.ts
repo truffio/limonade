@@ -9,14 +9,7 @@ import { STOCK_SCREENS } from '../ui/hud/StockPanel';
 import type { GameScene } from './GameScene';
 
 /** Screens that show a side panel on wide screens; the stand moves left to stay visible. */
-const PANEL_SCREENS: ReadonlySet<ScreenId> = new Set([
-  'meteo',
-  'magasin',
-  'recette',
-  'bilan',
-  'historique',
-  'fin',
-]);
+const PANEL_SCREENS: ReadonlySet<ScreenId> = new Set(['bilan', 'historique', 'fin']);
 /** Right panel width plus its margins (see `.panneau` in main.css). */
 const PANEL_WIDTH = 672;
 const MAX_PANEL_SHARE = 0.7;
@@ -35,6 +28,23 @@ export function focusShiftX(screen: ScreenId, width: number): number {
   return Math.min(MAX_PANEL_SHARE, (PANEL_WIDTH - left) / width);
 }
 const DAY_PANEL_SHARE = 0.12;
+/** Height of the planning dashboard's bottom row of panes (see `.rangee` in main.css). */
+const BOTTOM_ROW_HEIGHT = 330;
+const MAX_BOTTOM_SHARE = 0.55;
+/** The dashboard leaves a smaller window for the stand: zoom out a little. */
+const DASHBOARD_ZOOM = 1.35;
+
+/**
+ * How far to move the view up so the stand sits above whatever covers the
+ * bottom of the screen, as a share of the screen height.
+ */
+export function focusShiftY(screen: ScreenId, width: number, height: number): number {
+  if (screen === 'journee') return DAY_PANEL_SHARE;
+  if (screen === 'preparation' && width >= WIDE_SCREEN) {
+    return Math.min(MAX_BOTTOM_SHARE, BOTTOM_ROW_HEIGHT / height);
+  }
+  return 0;
+}
 
 /** Moment shown while planning: early morning, before opening. */
 const MORNING = 0.05;
@@ -64,9 +74,9 @@ export class SceneDirector {
 
   private updateFocus(screen: ScreenId): void {
     const x = focusShiftX(screen, window.innerWidth);
-    // During the day, the live counters cover the bottom of the screen.
-    const y = screen === 'journee' ? DAY_PANEL_SHARE : 0;
-    this.view.setFocusShift(x, y);
+    const y = focusShiftY(screen, window.innerWidth, window.innerHeight);
+    const zoom = screen === 'preparation' && window.innerWidth >= WIDE_SCREEN ? DASHBOARD_ZOOM : 1;
+    this.view.setFocusShift(x, y, zoom);
   }
 
   private sync(state: AppState): void {

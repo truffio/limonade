@@ -3,9 +3,9 @@ import { beforeEach, describe, expect, it } from 'vitest';
 import { App } from '../../src/app/App';
 import { buySupplies } from '../../src/core/actions';
 import { newGame } from '../../src/core/game';
-import { addUnits, closeInventory } from '../../src/core/inventory';
+import { addUnits } from '../../src/core/inventory';
 import type { GameState } from '../../src/core/types';
-import { focusShiftX } from '../../src/scene/SceneDirector';
+import { focusShiftX, focusShiftY } from '../../src/scene/SceneDirector';
 import { PITCHERS_FOR_FULL_BAR, stockGauges } from '../../src/ui/hud/stockGauges';
 import { testConfig, unwrap } from '../core/helpers';
 
@@ -45,23 +45,23 @@ describe('stock gauges', () => {
       full: cfg.supplies.ice.package_quantity,
     });
   });
-
-  it('flags lemons that spoil tonight', () => {
-    const game = newGame(cfg, { seed: 1 });
-    let inventory = addUnits(game.inventory, 'lemons', 6, 300);
-    inventory = closeInventory(inventory, cfg).inventory;
-    inventory = closeInventory(inventory, cfg).inventory; // 2 days old: spoils at the 3rd closing
-    expect(gauge({ ...game, inventory }, 'lemons').expiring).toBe(6);
-  });
 });
 
 describe('3D view shift with the stock column', () => {
   it('centres the stand between the stock column and the right panel on wide screens', () => {
-    expect(focusShiftX('magasin', 1280)).toBeCloseTo((672 - 238) / 1280, 6);
+    expect(focusShiftX('bilan', 1280)).toBeCloseTo((672 - 238) / 1280, 6);
     expect(focusShiftX('historique', 1280)).toBeCloseTo(672 / 1280, 6); // no stock column there
-    expect(focusShiftX('magasin', 1024)).toBeCloseTo(672 / 1024, 6); // stock is a strip on top
-    expect(focusShiftX('magasin', 800)).toBe(0);
+    expect(focusShiftX('bilan', 1024)).toBeCloseTo(672 / 1024, 6); // stock is a strip on top
+    expect(focusShiftX('bilan', 800)).toBe(0);
+    expect(focusShiftX('preparation', 1280)).toBe(0); // the dashboard keeps the stand centred
     expect(focusShiftX('journee', 1280)).toBe(0);
+  });
+
+  it('lifts the stand above the dashboard’s bottom row of panes', () => {
+    expect(focusShiftY('preparation', 1280, 800)).toBeCloseTo(330 / 800, 6);
+    expect(focusShiftY('preparation', 800, 1024)).toBe(0); // narrow: panes stack and scroll
+    expect(focusShiftY('journee', 1280, 800)).toBe(0.12);
+    expect(focusShiftY('bilan', 1280, 800)).toBe(0);
   });
 });
 
@@ -89,19 +89,20 @@ describe('stock panel in the app', () => {
     click(root, "C'est parti");
     expect(root.querySelector('.stock')).not.toBeNull();
     expect(root.querySelector('.barre__stock')).toBeNull(); // no longer in the top bar
-    expect(stockLine(root, 'lemons')?.textContent).toContain('Pas assez pour 1 pichet');
+    // Only a number and a bar: no warning text (an empty bar says it all).
+    expect(stockLine(root, 'lemons')?.querySelector('.stock__nombre')?.textContent).toBe('0');
+    expect(stockLine(root, 'lemons')?.textContent).not.toContain('Pas assez');
+    expect(stockLine(root, 'lemons')?.classList.contains('stock__ligne--bas')).toBe(true);
 
-    click(root, 'Au magasin');
     click(root, 'Citrons (paquets) : plus');
     click(root, 'Acheter');
     const lemons = stockLine(root, 'lemons');
     expect(lemons?.querySelector('.stock__nombre')?.textContent).toBe('6');
     expect(lemons?.querySelector('[role="meter"]')?.getAttribute('aria-valuenow')).toBe('6');
-    expect(lemons?.textContent).not.toContain('Pas assez');
+    expect(lemons?.classList.contains('stock__ligne--bas')).toBe(false);
 
     for (const s of ['Sucre', 'Glaçons', 'Gobelets']) click(root, `${s} (paquets) : plus`);
     click(root, 'Acheter');
-    click(root, 'Ma recette');
     expect(root.querySelector('.stock')).not.toBeNull();
     click(root, 'Ouvrir le stand');
 
@@ -126,7 +127,7 @@ describe('stock panel in the app', () => {
     expect(number('cups')).toBe('23'); // no sale, no change
     for (let i = 0; i < 6; i++) sale();
     expect(number('lemonade')).toBe('0');
-    expect(stockLine(root, 'lemonade')?.textContent).toContain('Plus de limonade');
+    expect(stockLine(root, 'lemonade')?.textContent).not.toContain('Plus de limonade');
 
     click(root, 'Passer');
     expect(root.querySelector('.stock')).not.toBeNull();

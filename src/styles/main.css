@@ -1771,3 +1771,340 @@ summary:focus-visible {
     display: none;
   }
 }
+
+/* ---------- Planning dashboard: independent panes around the stand ---------- */
+
+.ecran--preparation {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  gap: 12px;
+  align-items: start;
+}
+
+.ecran--preparation > .cote {
+  grid-column: 1;
+  grid-row: 1;
+}
+
+.tableau {
+  display: contents;
+}
+
+.volet {
+  pointer-events: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 14px;
+  border-radius: var(--rayon);
+  background: rgb(255 248 231 / 0.96);
+  box-shadow: var(--ombre-douce);
+  min-width: 0;
+}
+
+.ecran--entree .volet {
+  animation: entree-bas 0.28s ease-out;
+}
+
+.volet__titre {
+  font-size: 1.05rem;
+}
+
+.volet__astuce {
+  margin: -2px 0 0;
+  padding: 6px 10px;
+  border-radius: var(--rayon-petit);
+  background: #fffbe6;
+  border: 2px solid var(--citron);
+  font-size: 0.82rem;
+  line-height: 1.25;
+}
+
+/* Weather: top right, about 25 % smaller than the old panel. */
+.volet--meteo {
+  grid-column: 3;
+  grid-row: 1;
+  justify-self: end;
+  width: 480px;
+  font-size: 0.85rem;
+  gap: 6px;
+}
+
+.volet__entete {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.volet--meteo .meteo {
+  padding: 8px 10px;
+  gap: 10px;
+}
+
+.volet--meteo .meteo__icone {
+  font-size: 2.4rem;
+}
+
+.volet--meteo .meteo__temperature {
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.volet--meteo .meteo__ciel {
+  font-size: 0.9rem;
+}
+
+.volet--meteo .meteo__pluie {
+  font-size: 0.8rem;
+}
+
+.volet--meteo .affluence {
+  flex-direction: row;
+  flex-wrap: nowrap;
+  align-items: center;
+  gap: 4px 6px;
+}
+
+.volet--meteo .affluence__label {
+  font-weight: 600;
+}
+
+.volet--meteo .affluence__niveau {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.85rem;
+  opacity: 0.55;
+}
+
+.volet--meteo .affluence__niveau--actif {
+  opacity: 1;
+  border-width: 2px;
+}
+
+.volet--meteo .nouvelles {
+  padding: 6px 10px;
+  font-size: 0.8rem;
+}
+
+/* Bottom row: recipe, then shop, then price. */
+.rangee {
+  grid-column: 1 / -1;
+  grid-row: 3;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.35fr) minmax(0, 0.95fr);
+  gap: 12px;
+  align-items: end;
+  pointer-events: none;
+}
+
+/* Recipe pane */
+.volet--recette .recette__pichet {
+  width: 34px;
+  flex: none;
+  margin: -6px 0 -4px;
+}
+
+.recette__reglages {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.recette__besoins {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 10px;
+  font-size: 0.85rem;
+}
+
+.recette__besoins .manque {
+  color: var(--rouge-texte);
+  font-weight: 600;
+}
+
+/* Shop pane: one compact row per supply */
+.achats {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.achat {
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr) auto auto 56px;
+  align-items: center;
+  gap: 8px;
+  padding: 3px 8px;
+  border-radius: var(--rayon-petit);
+  background: var(--blanc);
+  border: 2px solid var(--bord);
+}
+
+.achat__icone {
+  font-size: 1.4rem;
+}
+
+.achat__nom {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.15;
+  min-width: 0;
+}
+
+.achat__nom small {
+  font-size: 0.72rem;
+  color: var(--texte-doux);
+}
+
+.achat__nom .avertissement {
+  color: var(--orange-texte);
+}
+
+.achat__prix {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  line-height: 1.15;
+}
+
+.achat__prix small {
+  font-size: 0.68rem;
+  color: var(--texte-doux);
+  white-space: nowrap;
+}
+
+.achat .stepper__label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.achat__ligne {
+  font-size: 0.8rem;
+  color: var(--texte-doux);
+  text-align: right;
+  white-space: nowrap;
+}
+
+.volet--magasin .panier {
+  padding: 6px 10px;
+  border-width: 2px;
+}
+
+/* Price pane */
+.volet--prix .prix__rapides {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.volet--prix .prix__rapides .btn {
+  min-height: 44px;
+  min-width: 0;
+  padding: 4px 2px;
+  font-size: 0.85rem;
+}
+
+.prix__infos {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  font-size: 0.88rem;
+}
+
+.prix__ligne-info {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.prix__ligne-info strong {
+  white-space: nowrap;
+}
+
+.prix__benefice {
+  font-size: 1rem;
+  padding-top: 4px;
+  border-top: 2px dashed var(--bord);
+}
+
+.prix__ouvrir {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.prix__ouvrir .avertissement {
+  font-size: 0.82rem;
+  text-align: center;
+}
+
+.prix__ouvrir .btn {
+  width: 100%;
+}
+
+/* Medium screens: the stock strip keeps a fixed width beside the weather. */
+@media (max-width: 1199px) {
+  .ecran--preparation > .cote {
+    width: 300px;
+  }
+
+  .volet--meteo {
+    width: 380px;
+  }
+
+  .ecran--preparation {
+    gap: 8px;
+  }
+
+  .volet {
+    gap: 6px;
+    padding: 10px 12px;
+  }
+
+  /* Rows stay on one line: the package size moves to a tooltip. */
+  .achat__nom small:not(.avertissement) {
+    display: none;
+  }
+
+  .achat {
+    grid-template-columns: 26px minmax(0, 1fr) auto auto;
+  }
+
+  .achat__ligne {
+    display: none;
+  }
+}
+
+/* Phones and portrait tablets: panes stack and the screen scrolls. */
+@media (max-width: 899px) {
+  .ecran--preparation {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    overflow-y: auto;
+    gap: 10px;
+  }
+
+  .ecran--preparation > .cote,
+  .volet--meteo {
+    width: auto;
+  }
+
+  .rangee {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+}

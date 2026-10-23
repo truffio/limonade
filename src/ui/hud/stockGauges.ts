@@ -1,5 +1,5 @@
 import type { GameConfig } from '../../config/schema';
-import { counts, lemonsExpiringToday } from '../../core/inventory';
+import { counts } from '../../core/inventory';
 import type { DayRecord, GameState, InventoryCounts, SupplyId } from '../../core/types';
 import { SUPPLIES } from '../../core/types';
 
@@ -13,10 +13,8 @@ export interface StockGauge {
   full: number;
   /** 0..1, clamped when stock is above the full scale. */
   fraction: number;
-  /** Not enough for one pitcher of the current recipe (or its cups). */
+  /** Not enough for one pitcher of the current recipe (or its cups); shown by the bar colour. */
   low: boolean;
-  /** Lemons that spoil at closing tonight (0 for other supplies). */
-  expiring: number;
 }
 
 /** Units of each supply needed for one pitcher with the current recipe (cups: one per serving). */
@@ -35,7 +33,6 @@ export function gauge(
   units: number,
   game: GameState,
   cfg: GameConfig,
-  expiring = 0,
 ): StockGauge {
   const need = perPitcher(game, cfg)[supply];
   // A recipe without sugar or ice still gets a sensible scale: one package.
@@ -46,32 +43,22 @@ export function gauge(
     full,
     fraction: Math.min(1, units / full),
     low: need > 0 && units < need,
-    expiring,
   };
 }
 
-export function gaugesFor(
-  stock: InventoryCounts,
-  game: GameState,
-  cfg: GameConfig,
-  expiringLemons: number,
-): StockGauge[] {
-  return SUPPLIES.map((supply) =>
-    gauge(supply, stock[supply], game, cfg, supply === 'lemons' ? expiringLemons : 0),
-  );
+export function gaugesFor(stock: InventoryCounts, game: GameState, cfg: GameConfig): StockGauge[] {
+  return SUPPLIES.map((supply) => gauge(supply, stock[supply], game, cfg));
 }
 
 /** Stock between two days: what is in the inventory now. */
 export function stockGauges(game: GameState, cfg: GameConfig): StockGauge[] {
-  return gaugesFor(counts(game.inventory), game, cfg, lemonsExpiringToday(game.inventory, cfg));
+  return gaugesFor(counts(game.inventory), game, cfg);
 }
 
 export interface DayStock {
   supplies: InventoryCounts;
   /** Servings of lemonade prepared this morning. */
   servings: number;
-  /** Lemons that spoil at closing tonight. */
-  expiringLemons: number;
 }
 
 /**
@@ -89,6 +76,5 @@ export function dayStartStock(record: DayRecord): DayStock {
       cups: after.cups + record.cupsSold,
     },
     servings: record.servingsMade,
-    expiringLemons: record.waste.lemonsSpoiled,
   };
 }

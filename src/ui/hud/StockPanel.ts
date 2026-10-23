@@ -1,38 +1,21 @@
 import { fr } from '../../i18n/fr';
 import { h } from '../dom';
 import type { ScreenContext, ScreenId } from '../screens/types';
-import { dayStartStock, gauge, gaugesFor, stockGauges, type StockGauge } from './stockGauges';
+import { dayStartStock, gauge, gaugesFor, stockGauges } from './stockGauges';
 
-/** Screens where the stock drives the decisions, plus the selling day where it runs down live (#45). */
-export const STOCK_SCREENS: ReadonlySet<ScreenId> = new Set([
-  'meteo',
-  'magasin',
-  'recette',
-  'journee',
-  'bilan',
-]);
-
-/** A warning in words, with a shorter version for the compact strip on smaller screens. */
-function alert(text: string, short: string): HTMLElement {
-  return h(
-    'small',
-    { class: 'stock__alerte', title: text },
-    h('span', { class: 'stock__alerte-long' }, text),
-    h('span', { class: 'stock__alerte-court', 'aria-hidden': 'true' }, short),
-  );
-}
+/** Screens with the stock pane, top left: planning, the selling day (live) and the report. */
+export const STOCK_SCREENS: ReadonlySet<ScreenId> = new Set(['preparation', 'journee', 'bilan']);
 
 interface Line {
   el: HTMLElement;
-  /** Redraws the number, bar and warning for a new count. */
-  set(count: number, full: number, low: boolean, warning: [string, string] | null): void;
+  /** Redraws the number and the bar for a new count. */
+  set(count: number, full: number, low: boolean): void;
 }
 
 function line(icon: string, name: string, key: string): Line {
   const number = h('strong', { class: 'stock__nombre' });
   const fill = h('div', { class: 'stock__remplissage' });
   const meter = h('div', { class: 'stock__jauge', role: 'meter', 'aria-valuemin': 0 }, fill);
-  const warnings = h('div', { class: 'stock__alertes' });
   const el = h(
     'li',
     { class: 'stock__ligne', 'data-supply': key },
@@ -44,33 +27,24 @@ function line(icon: string, name: string, key: string): Line {
       number,
     ),
     meter,
-    warnings,
   );
   return {
     el,
-    set(count, full, low, warning) {
+    set(count, full, low) {
       number.textContent = String(count);
       fill.style.width = `${Math.round(Math.min(1, full > 0 ? count / full : 0) * 100)}%`;
       meter.setAttribute('aria-valuemax', String(full));
       meter.setAttribute('aria-valuenow', String(Math.min(count, full)));
       meter.setAttribute('aria-label', `${name} : ${count}`);
       el.classList.toggle('stock__ligne--bas', low);
-      warnings.replaceChildren(...(warning ? [alert(...warning)] : []));
     },
   };
 }
 
-function warningFor(g: StockGauge): [string, string] | null {
-  if (g.expiring > 0) return [fr.hud.pourrissent(g.expiring), fr.hud.pourrissentCourt(g.expiring)];
-  if (g.low) return [fr.hud.stockBas, fr.hud.stockBasCourt];
-  return null;
-}
-
 /**
- * The player's supplies on the left of the screen: a big number and a bar per
- * supply, with warnings in words (never colour alone) when stock is too low
- * for one pitcher or lemons spoil tonight. During the selling day it follows
- * the replay live: each sale takes one cup and one glass of lemonade.
+ * The player's supplies: a number and a bar per supply, nothing else.
+ * During the selling day it follows the replay live: each sale takes one cup
+ * and one glass of lemonade.
  */
 export function renderStockPanel(ctx: ScreenContext): HTMLElement {
   const game = ctx.game();
@@ -79,14 +53,12 @@ export function renderStockPanel(ctx: ScreenContext): HTMLElement {
 
   const day = game.phase === 'JOURNEE' ? game.currentDay : null;
   const start = day ? dayStartStock(day.record) : null;
-  const gauges = start
-    ? gaugesFor(start.supplies, game, ctx.cfg, start.expiringLemons)
-    : stockGauges(game, ctx.cfg);
+  const gauges = start ? gaugesFor(start.supplies, game, ctx.cfg) : stockGauges(game, ctx.cfg);
 
   for (const g of gauges) {
     const info = fr.fournitures[g.supply];
     const l = line(info.icone, info.nom, g.supply);
-    l.set(g.count, g.full, g.low, warningFor(g));
+    l.set(g.count, g.full, g.low);
     lines.set(g.supply, l);
     list.append(l.el);
   }
@@ -94,14 +66,7 @@ export function renderStockPanel(ctx: ScreenContext): HTMLElement {
   if (start) {
     const made = start.servings;
     const glasses = line(fr.hud.verresPrets.icone, fr.hud.verresPrets.nom, 'lemonade');
-    const showGlasses = (left: number) =>
-      glasses.set(
-        left,
-        made,
-        left === 0,
-        left === 0 ? [fr.hud.plusDeLimonade, fr.hud.plusDeLimonadeCourt] : null,
-      );
-    showGlasses(made);
+    glasses.set(made, made, made === 0);
     list.prepend(glasses.el);
 
     let cups = start.supplies.cups;
@@ -111,9 +76,9 @@ export function renderStockPanel(ctx: ScreenContext): HTMLElement {
       if (event.type !== 'visitor' || event.outcome !== 'buy') return;
       cups = Math.max(0, cups - 1);
       servings = Math.max(0, servings - 1);
-      showGlasses(servings);
+      glasses.set(servings, made, servings === 0);
       const g = gauge('cups', cups, game, ctx.cfg);
-      cupsLine?.set(g.count, g.full, g.low, warningFor(g));
+      cupsLine?.set(g.count, g.full, g.low);
     });
     ctx.onCleanup(off);
   }
