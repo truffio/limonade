@@ -5,6 +5,7 @@ import { PLANNING_PHASES } from '../core/types';
 import { money } from '../i18n/format';
 import { fr } from '../i18n/fr';
 import type { AppState, ScreenId } from '../ui/screens/types';
+import { STOCK_SCREENS } from '../ui/hud/StockPanel';
 import type { GameScene } from './GameScene';
 
 /** Screens that show a side panel on wide screens; the stand moves left to stay visible. */
@@ -20,6 +21,19 @@ const PANEL_SCREENS: ReadonlySet<ScreenId> = new Set([
 const PANEL_WIDTH = 672;
 const MAX_PANEL_SHARE = 0.7;
 const WIDE_SCREEN = 900;
+/** Left stock column (#45): screen padding + `.stock` width + gap, shown from this width up. */
+const STOCK_PANEL_WIDTH = 238;
+const STOCK_COLUMN_SCREEN = 1200;
+
+/**
+ * How far to shift the view so the stand sits in the free space between the
+ * left stock column and the right panel, as a share of the screen width.
+ */
+export function focusShiftX(screen: ScreenId, width: number): number {
+  if (!PANEL_SCREENS.has(screen) || width < WIDE_SCREEN) return 0;
+  const left = STOCK_SCREENS.has(screen) && width >= STOCK_COLUMN_SCREEN ? STOCK_PANEL_WIDTH : 0;
+  return Math.min(MAX_PANEL_SHARE, (PANEL_WIDTH - left) / width);
+}
 const DAY_PANEL_SHARE = 0.12;
 
 /** Moment shown while planning: early morning, before opening. */
@@ -49,11 +63,7 @@ export class SceneDirector {
   }
 
   private updateFocus(screen: ScreenId): void {
-    const width = window.innerWidth;
-    const x =
-      PANEL_SCREENS.has(screen) && width >= WIDE_SCREEN
-        ? Math.min(MAX_PANEL_SHARE, PANEL_WIDTH / width)
-        : 0;
+    const x = focusShiftX(screen, window.innerWidth);
     // During the day, the live counters cover the bottom of the screen.
     const y = screen === 'journee' ? DAY_PANEL_SHARE : 0;
     this.view.setFocusShift(x, y);

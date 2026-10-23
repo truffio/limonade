@@ -3,6 +3,7 @@ import { finishDay, goToPhase } from '../core/actions';
 import type { ActionResult, GameState, Phase } from '../core/types';
 import { newGame } from '../core/game';
 import { fr } from '../i18n/fr';
+import { renderStockPanel, STOCK_SCREENS } from '../ui/hud/StockPanel';
 import { renderTopBar } from '../ui/hud/TopBar';
 import { screens } from '../ui/screens';
 import type { AppState, ScreenContext, ScreenId } from '../ui/screens/types';
@@ -211,6 +212,7 @@ export class App {
     const ctx = this.context();
     const content = screens[state.screen].render(ctx);
     const topBar = state.game && !WITHOUT_TOP_BAR.has(state.screen) ? renderTopBar(ctx) : null;
+    const stock = state.game && STOCK_SCREENS.has(state.screen) ? renderStockPanel(ctx) : null;
 
     // Animate only when arriving on a screen, not on every re-render of the same one.
     const entering = state.screen !== this.lastScreen;
@@ -219,7 +221,10 @@ export class App {
       ...(topBar ? [topBar] : []),
       h(
         'div',
-        { class: `ecran ecran--${state.screen}${entering ? ' ecran--entree' : ''}` },
+        {
+          class: `ecran ecran--${state.screen}${stock ? ' ecran--stock' : ''}${entering ? ' ecran--entree' : ''}`,
+        },
+        stock,
         content,
       ),
     );

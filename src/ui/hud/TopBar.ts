@@ -1,5 +1,4 @@
-import { count } from '../../core/inventory';
-import { PLANNING_PHASES, SUPPLIES } from '../../core/types';
+import { PLANNING_PHASES } from '../../core/types';
 import { money, signedMoney, temp } from '../../i18n/format';
 import { fr } from '../../i18n/fr';
 import { button, toneOf } from '../components';
@@ -40,17 +39,6 @@ export function renderTopBar(ctx: ScreenContext): HTMLElement {
       '📈 ',
       `${fr.hud.benefice} : `,
       h('strong', null, signedMoney(game.totalProfit)),
-    ),
-    h(
-      'span',
-      { class: 'barre__item barre__stock', 'aria-label': fr.hud.stock },
-      SUPPLIES.map((supply) =>
-        h(
-          'span',
-          { title: fr.fournitures[supply].nom },
-          `${fr.fournitures[supply].icone} ${count(game.inventory, supply)}`,
-        ),
-      ),
     ),
     planning
       ? h(
