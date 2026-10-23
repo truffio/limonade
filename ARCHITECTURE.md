@@ -474,11 +474,15 @@ The total profit is shown green when positive and red when negative, always with
 
 ## 12. Persistence
 
-- After every state change, `GameState` is autosaved to `localStorage` (`limonade.save.v1`), wrapped in try/catch.
-- On start, if a save exists, Accueil offers « Continuer la partie ».
+Implemented in `src/app/persistence.ts`:
+
+- After every state change, the game is autosaved to `localStorage` (`limonade.save.v1`), wrapped in try/catch so private mode or a full disk never breaks the game.
+- On start, if a save exists, Accueil offers « ▶ Continuer la partie (jour X / Y) ». The 🏠 button in the top bar returns to Accueil with the game saved.
+- A day interrupted during its replay resumes on its report: the day was already simulated, only the animation is lost.
 - The save includes the seed and the PRNG state, so loading a game resumes exactly where it stopped.
 - All storage keys start with `limonade.`, because every project page on `<owner>.github.io` shares the same `localStorage`.
-- Saves include a version number. A save from an incompatible version is ignored, and the player starts a new game.
+- Saves include a version number and a fingerprint of the config. A save from another version or another config is ignored, and a finished game is not offered for resuming.
+- Preferences (`limonade.preferences.v1`) remember whether Citronnelle's first-day tips are on.
 
 ---
 
