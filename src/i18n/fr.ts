@@ -15,6 +15,14 @@ export function plural(n: number, one: string, many: string): string {
   return `${n} ${Math.abs(n) <= 1 ? one : many}`;
 }
 
+/** Singular and plural names used in « Il manque … ». */
+const MANQUE_NOMS: Record<SupplyId, [string, string]> = {
+  lemons: ['citron', 'citrons'],
+  sugar: ['cuillère de sucre', 'cuillères de sucre'],
+  ice: ['glaçon', 'glaçons'],
+  cups: ['gobelet', 'gobelets'],
+};
+
 /** Every player-facing string. Keys are French to match the game vocabulary (ARCHITECTURE.md §10.4). */
 export const fr = {
   jeu: {
@@ -81,6 +89,22 @@ export const fr = {
     pourrissent: (n: number) => `⚠️ ${plural(n, 'pourrit', 'pourrissent')} ce soir`,
     pourrissentCourt: (n: number) => `⚠️ ${n} ce soir`,
     verresPrets: { icone: '🍹', nom: 'Verres prêts' },
+    recette: {
+      titre: 'Ta recette',
+      modifier: 'Modifier la recette',
+      parPichet: 'par pichet',
+      parPichetLong: (r: { lemons: number; sugar: number; ice: number }) =>
+        `Par pichet : ${plural(r.lemons, 'citron', 'citrons')}, ${plural(r.sugar, 'cuillère de sucre', 'cuillères de sucre')}, ${plural(r.ice, 'glaçon', 'glaçons')}`,
+      pichets: (pichets: number, verres: number) =>
+        `${plural(pichets, 'pichet', 'pichets')} = ${plural(verres, 'verre', 'verres')}`,
+      prix: 'Prix du verre',
+      cout: 'Coût d’un verre',
+      gain: 'Gain par verre',
+      perte: '⚠️ Perte par verre',
+      pret: '✅ Tout est prêt !',
+      manque: (supply: SupplyId, n: number) => `Il manque ${plural(n, ...MANQUE_NOMS[supply])}`,
+      manqueTitre: '⚠️ Il manque :',
+    },
     plusDeLimonade: '⚠️ Plus de limonade',
     plusDeLimonadeCourt: '⚠️ Vide',
     accueil: 'Retour à l’accueil (ta partie est sauvegardée)',
