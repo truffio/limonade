@@ -38,6 +38,8 @@ export class SceneManager {
   private readonly resizeObserver: ResizeObserver;
   /** Share of the screen covered by a panel (right side, bottom), so the stand stays clear of it. */
   private focusShift = { x: 0, y: 0 };
+  /** Wider field of view (zoomed out) when panes leave less room for the stand. */
+  private zoom = 1;
 
   constructor(private readonly container: HTMLElement) {
     this.renderer = new WebGLRenderer({ antialias: true });
@@ -86,9 +88,10 @@ export class SceneManager {
    * Moves the stand away from panels: left when a panel covers the right side
    * (`x` = share of the width), up when one covers the bottom (`y` = share of the height).
    */
-  setFocusShift(x: number, y = 0): void {
-    if (x === this.focusShift.x && y === this.focusShift.y) return;
+  setFocusShift(x: number, y = 0, zoom = 1): void {
+    if (x === this.focusShift.x && y === this.focusShift.y && zoom === this.zoom) return;
     this.focusShift = { x, y };
+    this.zoom = zoom;
     this.resize();
   }
 
@@ -109,7 +112,7 @@ export class SceneManager {
     const { clientWidth: width, clientHeight: height } = this.container;
     if (width === 0 || height === 0) return;
     this.camera.aspect = width / height;
-    this.camera.fov = fovForAspect(this.camera.aspect);
+    this.camera.fov = Math.min(80, fovForAspect(this.camera.aspect) * this.zoom);
     const { x, y } = this.focusShift;
     if (x > 0 || y > 0) {
       // Render a slightly larger view and look at the part away from the panel.

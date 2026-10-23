@@ -15,14 +15,6 @@ export function plural(n: number, one: string, many: string): string {
   return `${n} ${Math.abs(n) <= 1 ? one : many}`;
 }
 
-/** Singular and plural names used in « Il manque … ». */
-const MANQUE_NOMS: Record<SupplyId, [string, string]> = {
-  lemons: ['citron', 'citrons'],
-  sugar: ['cuillère de sucre', 'cuillères de sucre'],
-  ice: ['glaçon', 'glaçons'],
-  cups: ['gobelet', 'gobelets'],
-};
-
 /** Every player-facing string. Keys are French to match the game vocabulary (ARCHITECTURE.md §10.4). */
 export const fr = {
   jeu: {
@@ -41,14 +33,19 @@ export const fr = {
   },
   ecrans: {
     accueil: 'Accueil',
-    meteo: 'La météo de demain',
-    magasin: 'Le magasin',
-    recette: 'Ta recette',
+    preparation: 'Prépare ta journée',
     journee: 'Le stand est ouvert !',
     bilan: 'Bilan de la journée',
     historique: 'Historique',
     fin: 'Fin de la partie',
   } satisfies Record<ScreenId, string>,
+  /** Titles of the planning dashboard's panes. */
+  volets: {
+    meteo: '☀️ La météo de demain',
+    magasin: '🛒 Le magasin',
+    recette: '🍋 Ta recette',
+    prix: '🏷️ Ton prix',
+  },
   accueil: {
     bienvenue: 'Salut ! Moi, c’est Citronnelle. On vend la meilleure limonade du quartier ?',
     continuer: (jour: number, total: number) => `▶ Continuer la partie (jour ${jour} / ${total})`,
@@ -84,29 +81,7 @@ export const fr = {
     benefice: 'Bénéfice',
     prevision: 'prévision',
     stock: 'Ton stock',
-    stockBas: '⚠️ Pas assez pour 1 pichet',
-    stockBasCourt: '⚠️ Trop peu',
-    pourrissent: (n: number) => `⚠️ ${plural(n, 'pourrit', 'pourrissent')} ce soir`,
-    pourrissentCourt: (n: number) => `⚠️ ${n} ce soir`,
     verresPrets: { icone: '🍹', nom: 'Verres prêts' },
-    recette: {
-      titre: 'Ta recette',
-      modifier: 'Modifier la recette',
-      parPichet: 'par pichet',
-      parPichetLong: (r: { lemons: number; sugar: number; ice: number }) =>
-        `Par pichet : ${plural(r.lemons, 'citron', 'citrons')}, ${plural(r.sugar, 'cuillère de sucre', 'cuillères de sucre')}, ${plural(r.ice, 'glaçon', 'glaçons')}`,
-      pichets: (pichets: number, verres: number) =>
-        `${plural(pichets, 'pichet', 'pichets')} = ${plural(verres, 'verre', 'verres')}`,
-      prix: 'Prix du verre',
-      cout: 'Coût d’un verre',
-      gain: 'Gain par verre',
-      perte: '⚠️ Perte par verre',
-      pret: '✅ Tout est prêt !',
-      manque: (supply: SupplyId, n: number) => `Il manque ${plural(n, ...MANQUE_NOMS[supply])}`,
-      manqueTitre: '⚠️ Il manque :',
-    },
-    plusDeLimonade: '⚠️ Plus de limonade',
-    plusDeLimonadeCourt: '⚠️ Vide',
     accueil: 'Retour à l’accueil (ta partie est sauvegardée)',
     couperSon: 'Couper le son',
     remettreSon: 'Remettre le son',
@@ -145,7 +120,6 @@ export const fr = {
       forte: { icone: '🤩', texte: 'Beaucoup de monde !' },
     } satisfies Record<TrafficOutlook, { icone: string; texte: string }>,
     conseil: 'Attention, la météo peut se tromper !',
-    vaAuMagasin: 'Au magasin ➜',
   },
   magasin: {
     paquet: (quantite: number, unite: string) => `Paquet de ${quantite} ${unite}`,
@@ -160,8 +134,6 @@ export const fr = {
     acheter: 'Acheter',
     achatReussi: 'Achat réussi ! 🛍️',
     panierVide: 'Choisis des paquets avec les boutons +',
-    vaALaRecette: 'Ma recette ➜',
-    retourMeteo: '◀ Météo',
     conseil:
       'Les citrons pourrissent après quelques jours et les glaçons fondent le soir. Achète juste ce qu’il faut !',
     nouvelles: {
@@ -179,6 +151,7 @@ export const fr = {
     sucre: 'Cuillères de sucre',
     glacons: 'Glaçons',
     pichets: 'Nombre de pichets',
+    pichetsCourt: 'Pichets',
     pichetsMax: (n: number) => `Avec ton stock : ${plural(n, 'pichet', 'pichets')} au maximum`,
     verresParPichet: (n: number) => `1 pichet = ${plural(n, 'verre', 'verres')}`,
     besoin: 'Il te faut',
@@ -189,10 +162,17 @@ export const fr = {
     verresPrets: (n: number) => `Tu vas préparer ${plural(n, 'verre', 'verres')}.`,
     prix: 'Prix d’un verre',
     coutVerre: (cout: string) => `Un verre te coûte environ ${cout} à fabriquer.`,
+    coutUnVerre: 'Coût d’un verre',
+    gainParVerre: 'Gain par verre',
+    perteParVerre: '⚠️ Perte par verre',
+    coutTotal: (n: number) => `Fabriquer ${plural(n, 'verre', 'verres')}`,
+    prixCourt: 'Prix',
+    beneficePrevu: (n: number) =>
+      `Si tu vends ${n > 1 ? 'les' : 'le'} ${plural(n, 'verre', 'verres')}`,
+    besoinCourt: 'Il te faut :',
     gainVerre: (gain: string) => `Tu gagnes environ ${gain} par verre vendu.`,
     perteVerre: (perte: string) => `Attention : tu perds environ ${perte} par verre !`,
     ouvrir: 'Ouvrir le stand ! 🍋',
-    retourMagasin: '◀ Magasin',
     conseil:
       'Goûte et ajuste : les clients te diront si c’est trop acide, pas assez sucré ou pas assez frais.',
   },
@@ -325,13 +305,12 @@ export const fr = {
     nom: 'Citronnelle',
   },
   tutoriel: {
-    etape: (n: number) => `Étape ${n} sur 4`,
-    meteo:
-      'Voici la météo de demain. Quand il fait chaud et beau, beaucoup de clients ont soif ! Quand il pleut, il y en a moins.',
+    etape: (n: number) => `Étape ${n} sur 5`,
+    meteo: 'Chaud et beau = beaucoup de clients assoiffés ! Quand il pleut, il y en a moins.',
     magasin: (lemons: number, sugar: number, ice: number, cups: number) =>
-      `Achète tes ingrédients avec les boutons +. Pour 2 pichets, il te faut ${lemons} citrons, ${sugar} cuillères de sucre, ${ice} glaçons et ${cups} gobelets. Puis appuie sur « Acheter ».`,
-    recette:
-      'Choisis ta recette, tes pichets et ton prix : vends un verre plus cher qu’il ne te coûte ! Puis ouvre ton stand.',
+      `Pour 2 pichets : ${lemons} 🍋, ${sugar} 🍬, ${ice} 🧊 et ${cups} 🥤. Choisis avec +, puis « Acheter ».`,
+    recette: 'Choisis ta recette et ton nombre de pichets.',
+    prix: 'Vends plus cher que le coût, puis ouvre ton stand !',
     bilan:
       'Bravo, ta première journée est finie ! Le bénéfice te dit si tu as gagné de l’argent. Lis mes conseils en bas pour faire encore mieux demain.',
   },
