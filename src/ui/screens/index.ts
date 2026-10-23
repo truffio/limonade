@@ -11,5 +11,4 @@ export const screens: Record<ScreenId, Screen> = {
   bilan: placeholderScreen('bilan', 'fin'),
   historique: placeholderScreen('historique', 'bilan'),
   fin: placeholderScreen('fin', 'accueil'),
-  erreurConfig: placeholderScreen('erreurConfig', null),
 };

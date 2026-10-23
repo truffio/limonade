@@ -112,3 +112,26 @@ body {
   padding: 16px 40px;
   font-size: 1.5rem;
 }
+
+.card--erreur {
+  text-align: left;
+  border: 4px solid var(--corail);
+}
+
+.liste-erreurs {
+  padding-left: 20px;
+  font-size: 0.9rem;
+  overflow-wrap: anywhere;
+}
+
+.liste-erreurs code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.85em;
+  background: rgb(0 0 0 / 0.06);
+  padding: 1px 4px;
+  border-radius: 4px;
+}
+
+.liste-erreurs li + li {
+  margin-top: 8px;
+}
