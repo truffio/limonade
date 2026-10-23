@@ -169,7 +169,7 @@ Money is stored as **integer cents** everywhere to avoid floating‑point errors
 
 ```ts
 type Cents = number;
-type SupplyId = 'citrons' | 'sucre' | 'glacons' | 'gobelets';
+type SupplyId = 'lemons' | 'sugar' | 'ice' | 'cups';   // same ids as the config
 
 interface GameState {
   seed: number;
@@ -336,50 +336,35 @@ At most **3 messages** are shown, ranked by importance. They are built from coun
 
 The file has one section per spec §10 area. Every value has an explicit unit in its key name or in a `unit` field.
 
-```jsonc
-{
-  "game":     { "days": { "default": 14, "min": 14, "max": 60 },
-                "currency": "CAD", "locale": "fr-CA", "startingCash": 20.00,
-                "startingInventory": { "lemons": 0, "sugar": 0, "ice": 0, "cups": 0 } },
-  "supplies": {
-    "lemons": { "package_quantity": 6,   "unit": "citrons",
-                "starting_price_per_package": 3.00,
-                "minimum_price_per_package": 2.00, "maximum_price_per_package": 5.00,
-                "daily_volatility": 0.06, "spoilage_days": 3 },
-    "sugar":  { "package_quantity": 20,  "unit": "cuillères", ... },
-    "ice":    { "package_quantity": 50,  "unit": "glaçons", "melts_end_of_day": true, ... },
-    "cups":   { "package_quantity": 25,  "unit": "gobelets", ... }
-  },
-  "market_events": [ { "id": "RECOLTE_CITRONS", "supply": "lemons",
-                       "chance_per_day": 0.05, "price_multiplier": 0.75 } ],
-  "recipe":   { "servings_per_pitcher": 8,
-                "lemons_per_pitcher": { "min": 1, "max": 8, "default": 4 },
-                "sugar_per_pitcher":  { "min": 0, "max": 12, "default": 4 },
-                "ice_per_pitcher":    { "min": 0, "max": 20, "default": 6 },
-                "max_pitchers_per_day": 20, "selling_price": { "min": 0.10, "max": 5.00, "step": 0.05 } },
-  "weather":  { "temperature_c": { "mean": 27, "min": 16, "max": 38, "persistence": 0.6, "sd": 2.5 },
-                "cloud_transition_matrix": [[0.7,0.25,0.05],[0.3,0.5,0.2],[0.15,0.4,0.45]],
-                "rain_probability_by_cloud": [0.02, 0.15, 0.5],
-                "surprise_chance": 0.08,
-                "forecast": { "temperature_sd_c": 2.0, "cloud_accuracy": 0.8 } },
-  "demand":   { "base_visitors_per_slot": 15, "daily_variation_sd": 0.2,
-                "rain_factor": 0.3, "price_sensitivity": 2.5, "quality_weight": 3.0,
-                "reference_price": 1.00, "traffic_thresholds": { "moyenne": 40, "forte": 70 } },
-  "recipe_taste": { "ideal_lemons": 4, "ideal_sugar_ratio": 1.0, ... }
-}
-```
+The real file is [`config/game-config.json`](config/game-config.json), and the schema in `src/config/schema.ts` is the reference for every key. It has these sections:
 
-**Validation (`config/schema.ts`)** uses zod for types and ranges, plus `superRefine` for checks that span several fields:
+| Section | Contents | Units |
+| --- | --- | --- |
+| `game` | currency (`CAD`), locale (`fr-CA`), game length (`days.default/min/max`), starting cash and inventory | dollars, days, items |
+| `supplies.lemons/sugar/ice/cups` | package quantity, starting/min/max price per package, daily volatility and drift | items per package, dollars per package, fraction per day |
+| `market_events` | id, affected supply, chance per day, price multiplier, optional minimum temperature | probability 0–1, multiplier, °C |
+| `spoilage` | lemon spoilage age, whether ice melts and leftover lemonade is discarded | days, booleans |
+| `recipe` | servings per pitcher, min/max/default lemons, sugar and ice per pitcher, max pitchers, selling price range and step | items per pitcher, dollars per cup |
+| `taste` | ideal amounts and tolerances, ideal ice at 20 °C and 35 °C, weights | items per pitcher, items per lemon, fractions summing to 1 |
+| `weather` | temperature mean/min/max/persistence/sd, surprises, cloud transition matrix, rain chance by cloud, forecast accuracy | °C, probabilities |
+| `demand` | visitors per slot, daily variation, rain and temperature effects, purchase model, reference price, traffic outlook thresholds | visitors, multipliers, dollars per cup |
+
+Keys use English `snake_case`, following the spec's example. Supply ids are `lemons`, `sugar`, `ice`, `cups`, and cloud states are `soleil`, `nuageux`, `couvert`.
+
+**Validation (`src/config/schema.ts`)** uses zod 4 with its French locale for types and ranges, `strictObject` so a misspelled key is reported instead of ignored, and `superRefine` for checks that span several fields:
 - `min_price ≤ starting_price ≤ max_price`, and the minimum price is greater than 0
 - every probability is in [0,1], and each row of the Markov matrix sums to 1 (±1e‑6)
 - package quantities and servings per pitcher are positive integers
 - for each recipe range, `min ≤ default ≤ max`
 - temperatures satisfy `min < mean < max`
+- money has at most 2 decimals, and selling prices are multiples of the price step
+- taste weights sum to 1, and traffic thresholds satisfy `moyenne < forte`
+- the currency code and locale work with `Intl`
 - game length: `days.min ≥ 14`, `days.max ≤ 60`, and `days.min ≤ days.default ≤ days.max`. These bounds are fixed in the schema; the config can only narrow them.
 
-If validation fails, the game shows `ErreurConfigScreen` with a readable list, for example *« supplies.lemons : le prix minimum (6,00 $) est supérieur au prix maximum (5,00 $). »*. These messages are for whoever edits the config. They are written in French to match the rest of the game.
+If validation fails, the game shows `ErreurConfigScreen` with a readable list, for example *« supplies.lemons.minimum_price_per_package : le prix minimum (6,00 $) est supérieur au prix maximum (5,00 $) »*. All problems are listed at once, and the same list is logged to the console. These messages are for whoever edits the config. They are written in French to match the rest of the game.
 
-The values above are **placeholders**. `tools/balance-sim.ts` is used to tune them (§14).
+Loading converts every money value from dollars to integer cents. The current values are **placeholders**. `tools/balance-sim.ts` is used to tune them (§14).
 
 The config file is **bundled when the game is built** (`import config from '../config/game-config.json'`) and still validated when the game starts. To change balance, edit the JSON, commit it, and let GitHub Actions redeploy. Nothing is fetched at runtime.
 

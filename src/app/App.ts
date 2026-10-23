@@ -1,3 +1,4 @@
+import type { GameConfig } from '../config/schema';
 import { screens } from '../ui/screens';
 import type { ScreenContext, ScreenId } from '../ui/screens/types';
 import { EventBus, type GameEvents } from './events';
@@ -16,7 +17,10 @@ export class App {
     click: (id) => this.events.emit('button_click', { id }),
   };
 
-  constructor(private readonly uiRoot: HTMLElement) {}
+  constructor(
+    private readonly uiRoot: HTMLElement,
+    readonly config: GameConfig,
+  ) {}
 
   start(): void {
     this.store.subscribe((state) => this.render(state.screen));

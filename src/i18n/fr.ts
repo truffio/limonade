@@ -20,8 +20,12 @@ export const fr = {
     bilan: 'Bilan',
     historique: 'Historique',
     fin: 'Fin de la partie',
-    erreurConfig: 'Oups ! Problème de réglages',
   } satisfies Record<ScreenId, string>,
+  erreurConfig: {
+    titre: 'Oups ! Problème de réglages',
+    intro: 'Le fichier de réglages du jeu (config/game-config.json) contient des erreurs :',
+    conseil: 'Corrige ces lignes, puis recharge la page.',
+  },
   erreurs: {
     webgl: 'Ton appareil ne peut pas afficher le décor en 3D, mais tu peux quand même jouer !',
   },
