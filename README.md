@@ -5,6 +5,7 @@ A lemonade-stand business game for kids, in French. It is a static website (Type
 - Game rules: [`specifications.md`](specifications.md)
 - Architecture: [`ARCHITECTURE.md`](ARCHITECTURE.md)
 - Epics: [`docs/epics/`](docs/epics/)
+- Balance: [`docs/balance.md`](docs/balance.md)
 
 ## Development
 
@@ -18,6 +19,7 @@ npm run lint       # ESLint
 npm run typecheck  # TypeScript
 npm run build      # production build in dist/
 npm run preview    # serve dist/ at /limonade/, like GitHub Pages
+npm run balance    # bots play many games to check the game balance
 ```
 
 ## Deployment
