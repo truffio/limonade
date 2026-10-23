@@ -1,58 +1,60 @@
 import {
-  Clock,
-  Color,
   DirectionalLight,
   HemisphereLight,
   Mesh,
   PerspectiveCamera,
   Scene,
+  Timer,
   WebGLRenderer,
   type Object3D,
 } from 'three';
 import { COLORS, disposePalette } from './palette';
-import { createStand } from './Stand';
-import { createWorld } from './World';
+import { disposeSpriteTextures } from './sprites';
 
 type Updater = (dt: number, elapsed: number) => void;
 
 /** Longest frame step, so a tab returning from background doesn't jump animations. */
 const MAX_DT = 0.1;
 
-/** Owns the three.js renderer, camera, and render loop (ARCHITECTURE.md §9). */
+/** Owns the three.js renderer, camera, lights and render loop (ARCHITECTURE.md §9). */
 export class SceneManager {
   readonly scene = new Scene();
+  readonly sunLight = new DirectionalLight(0xffffff, 1.6);
+  readonly ambient = new HemisphereLight(0xffffff, COLORS.feuille, 1.2);
   private readonly camera = new PerspectiveCamera(35, 1, 0.1, 100);
   private readonly renderer: WebGLRenderer;
-  private readonly clock = new Clock();
+  private readonly timer = new Timer();
   private readonly updaters = new Set<Updater>();
   private readonly resizeObserver: ResizeObserver;
+  /** Share of the screen covered by a panel (right side, bottom), so the stand stays clear of it. */
+  private focusShift = { x: 0, y: 0 };
 
   constructor(private readonly container: HTMLElement) {
     this.renderer = new WebGLRenderer({ antialias: true });
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     container.append(this.renderer.domElement);
 
-    this.scene.background = new Color(COLORS.cielClair);
-    this.camera.position.set(6, 4.5, 10);
-    this.camera.lookAt(0, 1.2, 0);
+    this.camera.position.set(5.5, 4.2, 10);
+    this.camera.lookAt(0, 1.2, 0.5);
+    this.sunLight.position.set(5, 10, 6);
+    this.scene.add(this.ambient, this.sunLight);
 
-    const sun = new DirectionalLight(0xffffff, 1.6);
-    sun.position.set(5, 10, 6);
-    this.scene.add(new HemisphereLight(0xffffff, COLORS.feuille, 1.2), sun);
-
-    this.scene.add(createWorld(), createStand());
-
+    this.timer.connect(document);
     this.resizeObserver = new ResizeObserver(() => this.resize());
     this.resizeObserver.observe(container);
     this.resize();
   }
 
+  add(...objects: Object3D[]): void {
+    this.scene.add(...objects);
+  }
+
   start(): void {
-    this.clock.start();
     // requestAnimationFrame already pauses while the tab is hidden.
-    this.renderer.setAnimationLoop(() => {
-      const dt = Math.min(this.clock.getDelta(), MAX_DT);
-      const elapsed = this.clock.elapsedTime;
+    this.renderer.setAnimationLoop((timestamp) => {
+      this.timer.update(timestamp);
+      const dt = Math.min(this.timer.getDelta(), MAX_DT);
+      const elapsed = this.timer.getElapsed();
       for (const update of this.updaters) update(dt, elapsed);
       this.renderer.render(this.scene, this.camera);
     });
@@ -60,7 +62,6 @@ export class SceneManager {
 
   stop(): void {
     this.renderer.setAnimationLoop(null);
-    this.clock.stop();
   }
 
   /** Registers a per-frame callback. Returns a function that unregisters it. */
@@ -71,13 +72,25 @@ export class SceneManager {
     };
   }
 
+  /**
+   * Moves the stand away from panels: left when a panel covers the right side
+   * (`x` = share of the width), up when one covers the bottom (`y` = share of the height).
+   */
+  setFocusShift(x: number, y = 0): void {
+    if (x === this.focusShift.x && y === this.focusShift.y) return;
+    this.focusShift = { x, y };
+    this.resize();
+  }
+
   dispose(): void {
     this.stop();
+    this.timer.dispose();
     this.resizeObserver.disconnect();
     this.scene.traverse((object: Object3D) => {
       if (object instanceof Mesh) object.geometry.dispose();
     });
     disposePalette();
+    disposeSpriteTextures();
     this.renderer.dispose();
     this.renderer.domElement.remove();
   }
@@ -86,6 +99,13 @@ export class SceneManager {
     const { clientWidth: width, clientHeight: height } = this.container;
     if (width === 0 || height === 0) return;
     this.camera.aspect = width / height;
+    const { x, y } = this.focusShift;
+    if (x > 0 || y > 0) {
+      // Render a slightly larger view and look at the part away from the panel.
+      this.camera.setViewOffset(width, height, (width * x) / 2, (height * y) / 2, width, height);
+    } else {
+      this.camera.clearViewOffset();
+    }
     this.camera.updateProjectionMatrix();
     this.renderer.setSize(width, height);
   }
