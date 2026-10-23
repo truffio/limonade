@@ -21,9 +21,20 @@ interface SaveFile {
 export interface Preferences {
   /** Show Citronnelle's step-by-step tips on the first day. */
   conseils: boolean;
+  /** Sound effects (docs/epics/EPIC-son.md): on by default. */
+  son: boolean;
+  /** Background music: off by default. */
+  musique: boolean;
+  /** Volume from 1 (soft) to 5 (loud). */
+  volume: number;
 }
 
-const DEFAULT_PREFERENCES: Preferences = { conseils: true };
+export const DEFAULT_PREFERENCES: Preferences = {
+  conseils: true,
+  son: true,
+  musique: false,
+  volume: 3,
+};
 
 function storage(): Storage | null {
   try {
@@ -95,7 +106,18 @@ export function loadPreferences(): Preferences {
     const raw = storage()?.getItem(PREFERENCES_KEY);
     if (!raw) return { ...DEFAULT_PREFERENCES };
     const parsed = JSON.parse(raw) as Partial<Preferences>;
-    return { conseils: typeof parsed.conseils === 'boolean' ? parsed.conseils : true };
+    const flag = (value: unknown, fallback: boolean) =>
+      typeof value === 'boolean' ? value : fallback;
+    const volume =
+      typeof parsed.volume === 'number' && parsed.volume >= 1 && parsed.volume <= 5
+        ? Math.round(parsed.volume)
+        : DEFAULT_PREFERENCES.volume;
+    return {
+      conseils: flag(parsed.conseils, DEFAULT_PREFERENCES.conseils),
+      son: flag(parsed.son, DEFAULT_PREFERENCES.son),
+      musique: flag(parsed.musique, DEFAULT_PREFERENCES.musique),
+      volume,
+    };
   } catch {
     return { ...DEFAULT_PREFERENCES };
   }

@@ -4,6 +4,8 @@ import './styles/main.css';
 
 import rawConfig from '../config/game-config.json';
 import { App } from './app/App';
+import { AudioManager } from './audio/AudioManager';
+import { WebAudioPlayer } from './audio/WebAudioPlayer';
 import { fingerprint } from './app/persistence';
 import { describeIssue, loadConfig } from './config/loadConfig';
 import { fr } from './i18n/fr';
@@ -37,6 +39,10 @@ const result = loadConfig(rawConfig);
 if (result.ok) {
   const app = new App(uiRoot, result.config, { configFingerprint: fingerprint(rawConfig) });
   if (gameScene) new SceneDirector(app, gameScene);
+  const audio = new AudioManager(app, new WebAudioPlayer());
+  audio.installUnlock(document);
+  audio.installVisibility(document);
+  audio.installClicks(uiRoot);
   app.start();
 } else {
   console.error('Invalid config/game-config.json:\n' + result.issues.map(describeIssue).join('\n'));
