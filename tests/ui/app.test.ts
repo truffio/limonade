@@ -62,7 +62,9 @@ describe('App (full flow in French)', () => {
     const game = app.store.get().game;
     expect(game?.cash).toBeLessThan(cashBefore);
     expect(root.textContent).toContain('Achat réussi');
-    expect(root.textContent).toContain('🍋 6'); // top bar stock
+    expect(root.querySelector('.stock [data-supply="lemons"] .stock__nombre')?.textContent).toBe(
+      '6',
+    );
 
     click(root, 'Ma recette');
     expect(root.textContent).toContain('Ta recette');
