@@ -4,7 +4,7 @@ import { checkPreparation, type Ingredient } from '../../core/preparation';
 import type { DayPlan } from '../../core/types';
 import { money } from '../../i18n/format';
 import { fr } from '../../i18n/fr';
-import { actions, button, mascot, screenTitle, stepper, tutorialTip } from '../components';
+import { actions, button, columns, mascot, screenTitle, stepper, tutorialTip } from '../components';
 import { pitcherPreview } from '../components/pitcher';
 import { h } from '../dom';
 import type { Screen } from './types';
@@ -44,6 +44,7 @@ export const RecetteScreen: Screen = {
         value: plan.recipe[ingredient],
         min: ranges[ingredient].min,
         max: ranges[ingredient].max,
+        compact: true,
         onChange: (n) => update({ recipe: { ...plan.recipe, [ingredient]: n } }),
       }),
     );
@@ -91,89 +92,103 @@ export const RecetteScreen: Screen = {
           : null;
 
     const p = r.selling_price_per_cup;
+    const tip = tutorialTip(ctx, 3, fr.tutoriel.recette);
     return h(
       'section',
       { class: 'panneau' },
       screenTitle(fr.ecrans.recette),
-      tutorialTip(ctx, 3, fr.tutoriel.recette),
-      h(
-        'div',
-        { class: 'recette' },
-        h(
-          'div',
-          { class: 'recette__pichet' },
-          pitcherPreview(plan.recipe, r.lemons_per_pitcher.max, r.ice_per_pitcher.max),
-        ),
-        h(
-          'div',
-          { class: 'recette__ingredients' },
-          h('h2', null, fr.recette.parPichet),
-          ingredientSteppers,
-        ),
+      tip ?? mascot(fr.recette.conseil),
+      columns(
+        [
+          h(
+            'div',
+            { class: 'recette__entete' },
+            h(
+              'div',
+              { class: 'recette__pichet' },
+              pitcherPreview(plan.recipe, r.lemons_per_pitcher.max, r.ice_per_pitcher.max),
+            ),
+            h('h2', null, fr.recette.parPichet),
+          ),
+          ...ingredientSteppers,
+        ],
+        [
+          stepper({
+            id: 'pichets',
+            label: fr.recette.pichets,
+            icon: '🫗',
+            value: plan.pitchers,
+            min: 0,
+            max: r.max_pitchers_per_day,
+            hint: fr.recette.verresParPichet(r.servings_per_pitcher),
+            compact: true,
+            onChange: (n) => update({ pitchers: n }),
+          }),
+          h('small', { class: 'recette__max' }, fr.recette.pichetsMax(check.maxPitchers)),
+          checklist,
+          h('p', { class: 'recette__verres' }, fr.recette.verresPrets(check.servings)),
+          check.cupsLimitSales
+            ? h('p', { class: 'avertissement' }, fr.recette.gobeletsLimite(check.cupsAvailable))
+            : null,
+        ],
       ),
-      stepper({
-        id: 'pichets',
-        label: fr.recette.pichets,
-        icon: '🫗',
-        value: plan.pitchers,
-        min: 0,
-        max: r.max_pitchers_per_day,
-        hint: h(
-          'span',
-          null,
-          fr.recette.verresParPichet(r.servings_per_pitcher),
-          ' · ',
-          fr.recette.pichetsMax(check.maxPitchers),
-        ),
-        onChange: (n) => update({ pitchers: n }),
-      }),
-      checklist,
-      h('p', { class: 'recette__verres' }, fr.recette.verresPrets(check.servings)),
-      check.cupsLimitSales
-        ? h('p', { class: 'avertissement' }, fr.recette.gobeletsLimite(check.cupsAvailable))
-        : null,
       h(
         'div',
         { class: 'prix' },
-        stepper({
-          id: 'prix',
-          label: fr.recette.prix,
-          icon: '🏷️',
-          value: plan.pricePerCup,
-          min: p.min,
-          max: p.max,
-          step: p.step,
-          format: (c) => money(c),
-          onChange: (c) => update({ pricePerCup: c }),
-        }),
         h(
           'div',
-          { class: 'prix__rapides' },
-          QUICK_PRICES.filter((c) => c >= p.min && c <= p.max && c % p.step === 0).map((c) =>
-            button(money(c), () => update({ pricePerCup: c }), {
-              variant: c === plan.pricePerCup ? 'primary' : 'secondary',
-              focusKey: `prix-${c}`,
-            }),
+          { class: 'prix__ligne' },
+          stepper({
+            id: 'prix',
+            label: fr.recette.prix,
+            icon: '🏷️',
+            value: plan.pricePerCup,
+            min: p.min,
+            max: p.max,
+            step: p.step,
+            format: (c) => money(c),
+            compact: true,
+            onChange: (c) => update({ pricePerCup: c }),
+          }),
+          h(
+            'div',
+            { class: 'prix__rapides' },
+            QUICK_PRICES.filter((c) => c >= p.min && c <= p.max && c % p.step === 0).map((c) =>
+              button(money(c), () => update({ pricePerCup: c }), {
+                variant: c === plan.pricePerCup ? 'primary' : 'secondary',
+                focusKey: `prix-${c}`,
+              }),
+            ),
           ),
         ),
-        h('p', null, fr.recette.coutVerre(money(cost))),
         h(
           'p',
-          { class: margin >= 0 ? 'ton--bon' : 'ton--mauvais' },
-          margin >= 0 ? fr.recette.gainVerre(money(margin)) : fr.recette.perteVerre(money(-margin)),
+          { class: 'prix__marge' },
+          fr.recette.coutVerre(money(cost)),
+          ' ',
+          h(
+            'strong',
+            { class: margin >= 0 ? 'ton--bon' : 'ton--mauvais' },
+            margin >= 0
+              ? fr.recette.gainVerre(money(margin))
+              : fr.recette.perteVerre(money(-margin)),
+          ),
         ),
       ),
-      mascot(fr.recette.conseil),
-      blockReason ? h('p', { class: 'avertissement', role: 'status' }, blockReason) : null,
       actions(
         button(fr.recette.retourMagasin, () => ctx.goTo('magasin'), {
           variant: 'secondary',
           focusKey: 'vers-magasin',
         }),
+        blockReason
+          ? h('p', { class: 'avertissement ecran__raison', role: 'status' }, blockReason)
+          : null,
         button(
           fr.recette.ouvrir,
           () => {
-            if (ctx.act((g) => openStand(g, cfg))) ctx.events.emit('stand_open', { day: game.day });
+            if (ctx.act((g) => openStand(g, cfg))) {
+              ctx.events.emit('stand_open', { day: game.day });
+            }
           },
           { large: true, disabled: blocked, focusKey: 'ouvrir' },
         ),
