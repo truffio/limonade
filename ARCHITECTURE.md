@@ -54,7 +54,8 @@ limonade/
 │  ├─ app/
 │  │  ├─ App.ts                 # wires core ↔ UI ↔ scene, owns the screen flow
 │  │  ├─ store.ts               # tiny observable store holding GameState
-│  │  └─ events.ts              # typed event bus (hook for the future sound epic)
+│  │  ├─ events.ts              # typed event bus (scene and sound listen to it)
+│  │  └─ DayPlayer.ts           # replays the simulated day's events over ~30 s
 │  ├─ config/
 │  │  ├─ schema.ts              # zod schema + cross-field checks
 │  │  └─ loadConfig.ts          # parse, validate, convert dollars → cents
@@ -85,7 +86,7 @@ limonade/
 │  │  ├─ SkyAndWeather.ts       # sky color, sun, clouds, rain, time of day
 │  │  ├─ Customers.ts           # pooled low-poly characters + walk paths
 │  │  ├─ Bubbles.ts             # emoji reaction bubbles above customers
-│  │  ├─ DayPlayer.ts           # replays DaySimulation events on a timeline
+│  │  ├─ (DayPlayer lives in app/: the scene and the HUD both follow its timeline)
 │  │  └─ tween.ts               # small easing / tween helper
 │  ├─ ui/
 │  │  ├─ components/            # Button, Stepper, Slider, Card, Gauge, Modal, Mascot
@@ -437,7 +438,7 @@ The total profit is shown green when positive and red when negative, always with
 | **Journée** | Mostly the 3D scene. Small overlay: day clock progress bar, « Verres vendus : 12 », live cash, speed buttons |
 | **Bilan** | Big figures: « Clients venus », « Verres vendus », « Clients déçus » (missed sales), « Recette du jour », « Dépenses au magasin », « Variation de caisse ». The **« Bénéfice du jour »** is the headline of the screen: a large number with a simple stacked bar showing « Ventes − Coût des verres vendus − Gaspillage = Bénéfice ». A « Pourquoi ce n'est pas pareil que la caisse ? » ❓ button explains with the mascot. Then « Gaspillage » (🗑️ verres jetés, 🧊 glaçons fondus, 🍋 citrons pourris), « Prévu vs Réel » weather side by side, up to 3 mascot feedback messages, and the buttons « Historique » and « Jour suivant ➜ » |
 | **Historique** | A simple table with one row per day (météo prévue/réelle, prix, recette, verres vendus, bénéfice, caisse), plus small line charts of cash, profit per day, and supply prices (lightweight SVG drawn by hand, no chart library) |
-| **Fin** | Score « 💰 Tu termines avec 48,20 $ ! », then **« 📈 Bénéfice total : +28,20 $ »** with the kid‑friendly equation « Caisse de départ + Bénéfice = Caisse finale + Stock qu'il te reste ». Also the totals summary (spec §9), best day by profit, the day‑by‑day table, a fun title by score (« Apprenti citronnier », « Roi de la limonade »…), the early‑end explanation if needed, and « Rejouer » |
+| **Fin** | Score « 💰 Tu termines avec 48,20 $ ! », then **« 📈 Bénéfice total : +28,20 $ »** with the kid‑friendly equation « Caisse de départ + Bénéfice = Caisse finale + Stock qu'il te reste ». Also the totals summary (spec §9), best day by profit, the day‑by‑day table, a fun, gender‑neutral title by score (« Graine de citronnier », « As du stand », « Pro de la limonade », « Star de la limonade »), the early‑end explanation if needed, and « Rejouer » |
 
 ### 10.4 Vocabulary (consistent French terms)
 

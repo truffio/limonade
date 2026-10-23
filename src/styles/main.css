@@ -1,16 +1,25 @@
 :root {
   --citron: #ffd93d;
+  --citron-fonce: #c99400;
   --feuille: #6bcb77;
-  --feuille-fonce: #3f9a4c;
+  --feuille-fonce: #2f8a3c;
   --ciel: #4d96ff;
   --corail: #ff6b6b;
+  --rouge-texte: #b42318;
+  --orange-texte: #9a4d00;
   --creme: #fff8e7;
+  --blanc: #ffffff;
   --texte: #2b2b2b;
+  --texte-doux: #5c5c5c;
+  --bord: #e7dcc0;
   --ombre: 0 6px 0 rgb(0 0 0 / 0.15);
+  --ombre-douce: 0 8px 24px rgb(0 0 0 / 0.12);
   --rayon: 24px;
+  --rayon-petit: 14px;
 
   font-family: 'Fredoka', system-ui, sans-serif;
   font-size: 18px;
+  line-height: 1.35;
   color: var(--texte);
 }
 
@@ -25,6 +34,28 @@ body {
   overflow: hidden;
   background: #bfe3ff;
 }
+
+h1,
+h2,
+p {
+  margin: 0;
+}
+
+h2 {
+  font-size: 1.15rem;
+  font-weight: 600;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* ---------- Scene and overlay ---------- */
 
 #scene {
   position: fixed;
@@ -44,78 +75,860 @@ body {
   font-size: 0.9rem;
 }
 
-/* UI overlay: lets clicks reach nothing but the cards, so the scene stays visible. */
+/* The overlay only catches clicks on its cards, so the scene stays visible. */
 #ui {
   position: fixed;
   inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 16px;
   pointer-events: none;
 }
 
-.card {
-  pointer-events: auto;
-  width: min(100%, 520px);
-  padding: 32px;
-  border-radius: var(--rayon);
-  background: var(--creme);
-  box-shadow: var(--ombre);
-  text-align: center;
+.ui__ecran {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
-.card h1 {
-  margin: 0 0 12px;
-  font-size: 2rem;
-  font-weight: 600;
+.ecran {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  justify-content: flex-end;
+  align-items: flex-start;
+  padding: 16px;
+}
+
+.ecran > * {
+  pointer-events: auto;
+}
+
+.ecran--accueil {
+  justify-content: center;
+  align-items: center;
+}
+
+.ecran--journee {
+  justify-content: center;
+  align-items: flex-end;
+  overflow: hidden;
+}
+
+/* ---------- Cards and panels ---------- */
+
+.card,
+.panneau {
+  border-radius: var(--rayon);
+  background: var(--creme);
+  box-shadow: var(--ombre-douce);
+}
+
+.card {
+  width: min(100%, 560px);
+  padding: 32px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
 .titre-jeu {
   font-size: 2.4rem;
+  font-weight: 600;
 }
 
+.panneau {
+  width: min(100%, 600px);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.ecran__titre {
+  font-size: 1.8rem;
+  font-weight: 600;
+}
+
+.ecran__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+
+.ecran__actions > :only-child {
+  margin-left: auto;
+}
+
+/* ---------- Buttons ---------- */
+
 .btn {
-  min-height: 56px;
-  padding: 12px 28px;
+  min-height: 52px;
+  min-width: 52px;
+  padding: 10px 22px;
   border: none;
   border-radius: 999px;
   font: inherit;
   font-weight: 600;
-  font-size: 1.2rem;
+  font-size: 1.1rem;
   cursor: pointer;
   box-shadow: var(--ombre);
   transition: transform 0.1s;
 }
 
-.btn:active {
+.btn:active:not(:disabled) {
   transform: translateY(4px);
   box-shadow: 0 2px 0 rgb(0 0 0 / 0.15);
 }
 
-.btn:focus-visible {
+.btn:focus-visible,
+summary:focus-visible {
   outline: 4px solid var(--ciel);
   outline-offset: 3px;
 }
 
-.btn--primary {
-  background: var(--feuille);
-  color: white;
+.btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
 }
 
-.btn--primary:hover {
+.btn--primary {
   background: var(--feuille-fonce);
+  color: var(--blanc);
+}
+
+.btn--primary:hover:not(:disabled) {
+  background: #24702f;
+}
+
+.btn--secondary {
+  background: var(--blanc);
+  color: var(--texte);
+  border: 2px solid var(--bord);
+}
+
+.btn--ghost {
+  background: transparent;
+  box-shadow: none;
+  color: var(--texte);
+  text-decoration: underline;
+  padding-inline: 8px;
 }
 
 .btn--large {
-  min-height: 72px;
-  padding: 16px 40px;
-  font-size: 1.5rem;
+  min-height: 64px;
+  padding: 14px 32px;
+  font-size: 1.35rem;
 }
+
+/* ---------- Top bar (always visible during a game) ---------- */
+
+.barre {
+  pointer-events: auto;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 18px;
+  padding: 10px 16px;
+  background: rgb(255 248 231 / 0.95);
+  box-shadow: var(--ombre-douce);
+  font-size: 1rem;
+}
+
+.barre__item {
+  white-space: nowrap;
+}
+
+.barre__stock {
+  display: inline-flex;
+  gap: 12px;
+}
+
+.barre__meteo small {
+  color: var(--texte-doux);
+}
+
+.barre .btn {
+  min-height: 40px;
+  margin-left: auto;
+}
+
+.ton--bon {
+  color: var(--feuille-fonce);
+}
+
+.ton--mauvais {
+  color: var(--rouge-texte);
+}
+
+/* ---------- Mascot ---------- */
+
+.mascotte {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  text-align: left;
+}
+
+.mascotte__avatar {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--citron);
+  font-size: 2rem;
+  box-shadow: var(--ombre);
+}
+
+.mascotte__bulle {
+  position: relative;
+  flex: 1;
+  padding: 12px 16px;
+  border-radius: var(--rayon-petit);
+  background: var(--blanc);
+  border: 2px solid var(--bord);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.mascotte__bulle::before {
+  content: '';
+  position: absolute;
+  left: -10px;
+  top: 18px;
+  border: 8px solid transparent;
+  border-right-color: var(--bord);
+  border-left: 0;
+}
+
+/* ---------- Steppers ---------- */
+
+.stepper {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.stepper__label {
+  font-weight: 600;
+}
+
+.stepper__controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.stepper__controls .btn {
+  width: 56px;
+  height: 56px;
+  padding: 0;
+  font-size: 1.6rem;
+}
+
+.stepper__value {
+  min-width: 96px;
+  text-align: center;
+  font-size: 1.4rem;
+  font-weight: 600;
+}
+
+.stepper__hint {
+  color: var(--texte-doux);
+  font-size: 0.9rem;
+}
+
+/* ---------- Home ---------- */
+
+.accueil__boutons,
+.duree,
+.duree__rapides {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 12px;
+}
+
+.duree {
+  flex-direction: column;
+  align-items: center;
+}
+
+.aide {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+}
+
+.aide__carte {
+  padding: 14px;
+  border-radius: var(--rayon-petit);
+  background: var(--blanc);
+  border: 2px solid var(--bord);
+}
+
+.aide__icone {
+  font-size: 2rem;
+}
+
+/* ---------- Weather ---------- */
+
+.meteo {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 16px;
+  border-radius: var(--rayon-petit);
+  background: var(--blanc);
+}
+
+.meteo__icone {
+  font-size: 4.5rem;
+  line-height: 1;
+}
+
+.meteo__temperature {
+  font-size: 2.4rem;
+  font-weight: 600;
+}
+
+.affluence {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.affluence__choix {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.affluence__niveau {
+  padding: 10px;
+  text-align: center;
+  border-radius: var(--rayon-petit);
+  border: 2px solid var(--bord);
+  background: var(--blanc);
+  color: var(--texte-doux);
+  opacity: 0.6;
+}
+
+.affluence__niveau--actif {
+  opacity: 1;
+  color: var(--texte);
+  border: 3px solid var(--feuille-fonce);
+  font-weight: 600;
+}
+
+.affluence__visage {
+  font-size: 2.2rem;
+}
+
+.nouvelles {
+  padding: 12px 16px;
+  border-radius: var(--rayon-petit);
+  background: #fff1b8;
+  border: 2px solid var(--citron);
+  font-weight: 600;
+}
+
+/* ---------- Shop ---------- */
+
+.fournitures {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.fourniture {
+  padding: 14px 16px;
+  border-radius: var(--rayon-petit);
+  background: var(--blanc);
+  border: 2px solid var(--bord);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.fourniture__entete {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.fourniture__entete small {
+  display: block;
+  color: var(--texte-doux);
+}
+
+.fourniture__icone {
+  font-size: 2.2rem;
+}
+
+.fourniture__prix {
+  margin-left: auto;
+  text-align: right;
+  font-size: 1.2rem;
+}
+
+.fourniture__prix small {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--texte-doux);
+}
+
+.fourniture__historique summary {
+  cursor: pointer;
+  color: var(--texte-doux);
+}
+
+.avertissement {
+  color: var(--orange-texte);
+  font-weight: 600;
+}
+
+.panier {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 20px;
+  padding: 14px 16px;
+  border-radius: var(--rayon-petit);
+  background: var(--blanc);
+  border: 3px solid var(--feuille);
+}
+
+.panier .btn {
+  margin-left: auto;
+}
+
+.panier small {
+  flex-basis: 100%;
+  color: var(--texte-doux);
+}
+
+/* ---------- Recipe ---------- */
+
+.recette {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+}
+
+.recette__pichet {
+  flex: none;
+  width: 120px;
+}
+
+.recette__ingredients {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.pichet {
+  width: 100%;
+  height: auto;
+}
+
+.pichet__verre {
+  fill: rgb(255 255 255 / 0.7);
+  stroke: #9bb7d4;
+  stroke-width: 3;
+}
+
+.pichet__anse {
+  stroke: #9bb7d4;
+  stroke-width: 6;
+  stroke-linecap: round;
+}
+
+.pichet__glacon {
+  fill: rgb(220 240 255 / 0.95);
+  stroke: #8cc3f0;
+  stroke-width: 1.5;
+}
+
+.pichet__sucre {
+  fill: var(--blanc);
+}
+
+.liste-courses {
+  border-collapse: collapse;
+  width: 100%;
+  background: var(--blanc);
+  border-radius: var(--rayon-petit);
+  overflow: hidden;
+}
+
+.liste-courses th,
+.liste-courses td {
+  padding: 8px 12px;
+  text-align: left;
+}
+
+.liste-courses tr + tr {
+  border-top: 1px solid var(--bord);
+}
+
+.liste-courses .manque {
+  background: #ffe7e3;
+}
+
+.prix {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px 16px;
+  border-radius: var(--rayon-petit);
+  background: var(--blanc);
+}
+
+.prix__rapides {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.prix__rapides .btn {
+  min-height: 44px;
+  padding: 6px 16px;
+}
+
+/* ---------- Selling day ---------- */
+
+.journee {
+  width: min(100%, 720px);
+  padding: 16px 20px;
+  border-radius: var(--rayon);
+  background: rgb(255 248 231 / 0.94);
+  box-shadow: var(--ombre-douce);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.journee__haut {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.journee__horloge {
+  font-size: 1.6rem;
+  font-weight: 600;
+  min-width: 96px;
+}
+
+.journee__barre {
+  flex: 1;
+  height: 16px;
+  border-radius: 999px;
+  background: var(--bord);
+  overflow: hidden;
+}
+
+.journee__barre-remplie {
+  height: 100%;
+  background: linear-gradient(90deg, var(--citron), var(--feuille));
+  transition: width 0.15s linear;
+}
+
+.journee__compteurs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 24px;
+  font-size: 1.15rem;
+}
+
+.journee__annonce {
+  min-height: 1.4em;
+  font-weight: 600;
+}
+
+.journee__clients {
+  display: flex;
+  gap: 6px;
+  min-height: 2.2rem;
+  font-size: 1.8rem;
+}
+
+.journee__visage {
+  animation: apparition 0.3s ease-out;
+}
+
+@keyframes apparition {
+  from {
+    transform: translateY(12px) scale(0.6);
+    opacity: 0;
+  }
+}
+
+.journee__vitesse {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+/* ---------- Report ---------- */
+
+.benefice {
+  padding: 18px;
+  border-radius: var(--rayon-petit);
+  background: var(--blanc);
+  border: 3px solid var(--bord);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+}
+
+.benefice--bon {
+  border-color: var(--feuille);
+}
+
+.benefice--mauvais {
+  border-color: var(--corail);
+}
+
+.benefice__label {
+  font-weight: 600;
+}
+
+.benefice__valeur {
+  font-size: 2.8rem;
+  font-weight: 600;
+}
+
+.benefice--bon .benefice__valeur {
+  color: var(--feuille-fonce);
+}
+
+.benefice--mauvais .benefice__valeur {
+  color: var(--rouge-texte);
+}
+
+.benefice__calcul {
+  color: var(--texte-doux);
+  font-size: 0.95rem;
+}
+
+.benefice .mascotte {
+  text-align: left;
+}
+
+.tuiles {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px;
+}
+
+.tuile {
+  padding: 12px;
+  border-radius: var(--rayon-petit);
+  background: var(--blanc);
+  border: 2px solid var(--bord);
+  text-align: center;
+}
+
+.tuile__valeur {
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.tuile__label {
+  font-size: 0.9rem;
+  color: var(--texte-doux);
+}
+
+.tuile--bon .tuile__valeur {
+  color: var(--feuille-fonce);
+}
+
+.tuile--mauvais .tuile__valeur {
+  color: var(--rouge-texte);
+}
+
+.bilan__bloc {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.liste-simple {
+  margin: 0;
+  padding-left: 0;
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 18px;
+}
+
+/* ---------- History and charts ---------- */
+
+.graphiques {
+  display: grid;
+  gap: 14px;
+}
+
+.graphique {
+  margin: 0;
+  padding: 12px;
+  border-radius: var(--rayon-petit);
+  background: var(--blanc);
+}
+
+.graphique figcaption {
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.graphique__svg {
+  width: 100%;
+  height: auto;
+  overflow: visible;
+}
+
+.graphique__grille {
+  stroke: var(--bord);
+  stroke-width: 1;
+}
+
+.graphique__zero {
+  stroke: var(--texte-doux);
+  stroke-width: 1.5;
+  stroke-dasharray: 4 4;
+}
+
+.graphique__axe {
+  font-size: 10px;
+  fill: var(--texte-doux);
+}
+
+.graphique__legende {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  font-size: 0.85rem;
+}
+
+.graphique__legende i {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  margin-right: 4px;
+  vertical-align: middle;
+}
+
+.tableau-defilant {
+  overflow-x: auto;
+  border-radius: var(--rayon-petit);
+  background: var(--blanc);
+}
+
+.historique {
+  border-collapse: collapse;
+  width: 100%;
+  font-size: 0.8rem;
+}
+
+.historique th,
+.historique td {
+  padding: 6px 6px;
+  text-align: left;
+  white-space: nowrap;
+}
+
+/* Weather and recipe cells may wrap so the money columns stay visible. */
+.historique td:nth-child(2),
+.historique td:nth-child(3) {
+  white-space: normal;
+}
+
+.historique thead th {
+  background: #fff1b8;
+}
+
+.historique tbody tr + tr {
+  border-top: 1px solid var(--bord);
+}
+
+/* ---------- End of game ---------- */
+
+.fin__raison {
+  font-size: 1.1rem;
+}
+
+.fin__titre {
+  font-size: 1.6rem;
+  font-weight: 600;
+  color: var(--citron-fonce);
+}
+
+.fin__score {
+  font-size: 2rem;
+  font-weight: 600;
+}
+
+.fin__benefice {
+  font-size: 1.4rem;
+  font-weight: 600;
+}
+
+.fin__equation {
+  padding: 12px 16px;
+  border-radius: var(--rayon-petit);
+  background: var(--blanc);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* ---------- Toasts ---------- */
+
+.ui__toasts {
+  position: fixed;
+  left: 50%;
+  top: 72px;
+  transform: translateX(-50%);
+  pointer-events: none;
+  width: min(calc(100% - 32px), 420px);
+}
+
+.toast {
+  padding: 14px 20px;
+  border-radius: var(--rayon-petit);
+  box-shadow: var(--ombre-douce);
+  font-weight: 600;
+  text-align: center;
+  animation: apparition 0.25s ease-out;
+}
+
+.toast--ok {
+  background: var(--feuille-fonce);
+  color: var(--blanc);
+}
+
+.toast--erreur {
+  background: var(--rouge-texte);
+  color: var(--blanc);
+}
+
+/* ---------- Config error ---------- */
 
 .card--erreur {
   text-align: left;
   border: 4px solid var(--corail);
+  pointer-events: auto;
+  margin: 16px auto;
 }
 
 .liste-erreurs {
@@ -134,4 +947,41 @@ body {
 
 .liste-erreurs li + li {
   margin-top: 8px;
+}
+
+/* ---------- Small screens ---------- */
+
+@media (max-width: 640px) {
+  :root {
+    font-size: 17px;
+  }
+
+  .ecran {
+    padding: 10px;
+  }
+
+  .panneau,
+  .card {
+    padding: 18px;
+  }
+
+  .barre {
+    gap: 6px 12px;
+    font-size: 0.9rem;
+  }
+
+  .recette {
+    flex-direction: column;
+  }
+
+  .meteo__icone {
+    font-size: 3.5rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
 }
