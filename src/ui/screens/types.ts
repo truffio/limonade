@@ -1,13 +1,5 @@
 export type ScreenId =
-  | 'accueil'
-  | 'meteo'
-  | 'magasin'
-  | 'recette'
-  | 'journee'
-  | 'bilan'
-  | 'historique'
-  | 'fin'
-  | 'erreurConfig';
+  'accueil' | 'meteo' | 'magasin' | 'recette' | 'journee' | 'bilan' | 'historique' | 'fin';
 
 export interface ScreenContext {
   goTo(screen: ScreenId): void;
