@@ -120,7 +120,7 @@ export function renderStockPanel(ctx: ScreenContext): HTMLElement {
 
   return h(
     'aside',
-    { class: 'stock', 'aria-labelledby': 'stock-titre' },
+    { class: 'stock carte-cote', 'aria-labelledby': 'stock-titre' },
     h('h2', { class: 'stock__titre', id: 'stock-titre' }, `📦 ${fr.hud.stock}`),
     list,
   );
