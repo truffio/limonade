@@ -3,6 +3,7 @@ import { finishDay, goToPhase } from '../core/actions';
 import type { ActionResult, GameState, Phase } from '../core/types';
 import { newGame } from '../core/game';
 import { fr } from '../i18n/fr';
+import { renderRecipePanel, RECIPE_SCREENS } from '../ui/hud/RecipePanel';
 import { renderStockPanel, STOCK_SCREENS } from '../ui/hud/StockPanel';
 import { renderTopBar } from '../ui/hud/TopBar';
 import { screens } from '../ui/screens';
@@ -212,7 +213,16 @@ export class App {
     const ctx = this.context();
     const content = screens[state.screen].render(ctx);
     const topBar = state.game && !WITHOUT_TOP_BAR.has(state.screen) ? renderTopBar(ctx) : null;
-    const stock = state.game && STOCK_SCREENS.has(state.screen) ? renderStockPanel(ctx) : null;
+    // Left side: the stock (#45) and, while planning, the recipe summary (#50).
+    const side =
+      state.game && STOCK_SCREENS.has(state.screen)
+        ? h(
+            'div',
+            { class: 'cote' },
+            renderStockPanel(ctx),
+            RECIPE_SCREENS.has(state.screen) ? renderRecipePanel(ctx) : null,
+          )
+        : null;
 
     // Animate only when arriving on a screen, not on every re-render of the same one.
     const entering = state.screen !== this.lastScreen;
@@ -222,9 +232,9 @@ export class App {
       h(
         'div',
         {
-          class: `ecran ecran--${state.screen}${stock ? ' ecran--stock' : ''}${entering ? ' ecran--entree' : ''}`,
+          class: `ecran ecran--${state.screen}${side ? ' ecran--stock' : ''}${entering ? ' ecran--entree' : ''}`,
         },
-        stock,
+        side,
         content,
       ),
     );
