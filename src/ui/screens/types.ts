@@ -14,6 +14,10 @@ export interface UiState {
   explicationOuverte: boolean;
   /** Citronnelle's step-by-step tips on the first day (saved as a preference). */
   conseils: boolean;
+  /** Sound settings (saved as preferences, applied by the audio module). */
+  son: boolean;
+  musique: boolean;
+  volume: number;
 }
 
 export interface AppState {

@@ -2,9 +2,17 @@
 
 | | |
 | --- | --- |
-| **Status** | To do |
+| **Status** | Done |
 | **Depends on** | Architecture milestones 5 (UI flow) and 6 (3D scene + `DayPlayer`) |
 | **Related** | `ARCHITECTURE.md` §15 (event bus `app/events.ts`) |
+
+## Decisions
+
+- **Synthesized sounds.** Every sound is built in code from oscillators and filtered noise (`src/audio/synth.ts`, `src/audio/sounds.ts`). There are no audio files to download or license, and the total added size is a few kilobytes of code.
+- **Defaults.** Sound effects are on and music is off. Both are remembered with the other preferences (`limonade.preferences.v1`), together with a volume from 1 to 5.
+- **Controls.** A 🔊/🔇 button in the top bar mutes everything instantly. Accueil has a « ⚙️ Réglages » section with Son, Musique, Volume and Citronnelle's tips.
+- **End of day.** The report's happy or sad jingle is the end-of-day sound, so a skipped day plays only that, never a burst of queued sounds.
+- **Footsteps** were left out: with up to 60 visitors a day they made the stand noisy.
 
 ## Goal
 
@@ -68,13 +76,13 @@ Make the game feel alive and rewarding for a 10‑year‑old with sound. Short, 
 
 ## Acceptance criteria
 
-- [ ] No sound plays before the first user interaction, and there are no autoplay errors in the console.
-- [ ] Every event in the sound map plays its sound at the right moment during a normal day, at ×2 speed, and after « Passer » (skipping plays only the end‑of‑day jingle, never a burst of queued sounds).
-- [ ] The mute toggle works instantly and is remembered across reloads.
-- [ ] The game is fully playable and understandable with sound off.
-- [ ] The total size of the audio files is under about 1.5 MB, and sound loading doesn't delay the first screen.
-- [ ] `CREDITS.md` lists every audio file with its license.
-- [ ] It works on the GitHub Pages build (correct `/limonade/` base path for audio files).
+- [x] No sound plays before the first user interaction, and there are no autoplay errors in the console.
+- [x] Every event in the sound map plays its sound at the right moment during a normal day, at ×2 speed, and after « Passer » (skipping plays only the end‑of‑day jingle, never a burst of queued sounds).
+- [x] The mute toggle works instantly and is remembered across reloads.
+- [x] The game is fully playable and understandable with sound off.
+- [x] The total size of the audio files is under about 1.5 MB, and sound loading doesn't delay the first screen (there are no audio files).
+- [x] `CREDITS.md` lists every audio file with its license (it explains that all sounds are synthesized).
+- [x] It works on the GitHub Pages build (no audio files, so no paths to get wrong).
 
 ## Out of scope
 

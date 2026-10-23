@@ -96,12 +96,43 @@ export const AccueilScreen: Screen = {
             () => ctx.setUi({ aideOuverte: !ctx.state.ui.aideOuverte }),
             { variant: 'secondary', focusKey: 'aide' },
           ),
-          button(
-            fr.accueil.conseils(ctx.state.ui.conseils),
-            () => ctx.setUi({ conseils: !ctx.state.ui.conseils }),
-            { variant: 'ghost', focusKey: 'conseils' },
-          ),
         ),
+      chosen === null
+        ? h(
+            'details',
+            { class: 'reglages' },
+            h('summary', null, `⚙️ ${fr.accueil.reglages}`),
+            h(
+              'div',
+              { class: 'reglages__contenu' },
+              button(
+                fr.accueil.son(ctx.state.ui.son),
+                () => ctx.setUi({ son: !ctx.state.ui.son }),
+                { variant: 'secondary', focusKey: 'reglage-son' },
+              ),
+              button(
+                fr.accueil.musique(ctx.state.ui.musique),
+                () => ctx.setUi({ musique: !ctx.state.ui.musique }),
+                { variant: 'secondary', focusKey: 'reglage-musique', disabled: !ctx.state.ui.son },
+              ),
+              stepper({
+                id: 'volume',
+                label: fr.accueil.volume,
+                icon: '🔉',
+                value: ctx.state.ui.volume,
+                min: 1,
+                max: 5,
+                format: (v) => '●'.repeat(v) + '○'.repeat(5 - v),
+                onChange: (v) => ctx.setUi({ volume: v }),
+              }),
+              button(
+                fr.accueil.conseils(ctx.state.ui.conseils),
+                () => ctx.setUi({ conseils: !ctx.state.ui.conseils }),
+                { variant: 'secondary', focusKey: 'conseils' },
+              ),
+            ),
+          )
+        : null,
       help,
       chosen === null ? mascot(fr.accueil.bienvenue) : null,
     );
