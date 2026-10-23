@@ -1418,11 +1418,11 @@ summary:focus-visible {
 
 .colonnes .tuiles {
   grid-template-columns: 1fr 1fr;
-  gap: 8px;
+  gap: 6px;
 }
 
 .tuile {
-  padding: 8px 6px;
+  padding: 6px;
 }
 
 .tuile__valeur {
@@ -1451,5 +1451,222 @@ summary:focus-visible {
 
   .colonnes .tuiles {
     grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* ---------- Stock panel (issue #45) ---------- */
+
+.ecran--stock {
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.stock {
+  pointer-events: auto;
+  align-self: flex-start;
+  flex: none;
+  width: 210px;
+  padding: 12px 14px;
+  border-radius: var(--rayon);
+  background: rgb(255 248 231 / 0.95);
+  box-shadow: var(--ombre-douce);
+}
+
+.ecran--entree > .stock {
+  animation: entree-gauche 0.28s ease-out;
+}
+
+@keyframes entree-gauche {
+  from {
+    transform: translateX(-28px);
+    opacity: 0;
+  }
+}
+
+.stock__titre {
+  font-size: 1rem;
+  margin-bottom: 8px;
+}
+
+.stock__liste {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.stock__ligne {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.stock__entete {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.stock__icone {
+  font-size: 1.4rem;
+}
+
+.stock__nom {
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.stock__nombre {
+  margin-left: auto;
+  font-size: 1.6rem;
+  line-height: 1;
+}
+
+.stock__jauge {
+  height: 14px;
+  border-radius: 999px;
+  background: var(--bord);
+  overflow: hidden;
+}
+
+.stock__remplissage {
+  height: 100%;
+  border-radius: 999px;
+  background: var(--feuille);
+  transition: width 0.3s ease-out;
+}
+
+.stock__ligne--bas .stock__remplissage {
+  background: #f08c2b;
+}
+
+.stock__ligne--bas .stock__nombre {
+  color: var(--orange-texte);
+}
+
+.stock__alerte {
+  color: var(--orange-texte);
+  font-weight: 600;
+  font-size: 0.78rem;
+  line-height: 1.2;
+}
+
+.stock__alerte-court {
+  display: none;
+}
+
+/* Medium screens: a compact strip to the left of the right panel, above the stand. */
+@media (max-width: 1199px) {
+  .stock {
+    flex: 1;
+    width: auto;
+    min-width: 0;
+    padding: 8px 10px;
+  }
+
+  .stock__titre {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+
+  .stock__liste {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 8px;
+  }
+
+  .stock__nom {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+
+  .stock__nombre {
+    font-size: 1.25rem;
+  }
+
+  .stock__jauge {
+    height: 10px;
+  }
+
+  .stock__alerte {
+    font-size: 0.72rem;
+  }
+
+  /* The short words show; the full sentence stays for screen readers and as a tooltip. */
+  .stock__alerte-long {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    white-space: nowrap;
+  }
+
+  .stock__alerte-court {
+    display: inline;
+  }
+}
+
+/* Phones and portrait tablets: the strip sits above the panel. */
+@media (max-width: 899px) {
+  .ecran--stock {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  .ecran--stock > .stock {
+    flex: none;
+    align-self: stretch;
+  }
+
+  .ecran--stock > .panneau {
+    flex: 0 1 auto;
+    min-height: 0;
+    width: 100%;
+  }
+}
+
+/* During the selling day the stock floats over the scene, top left (#45: live stock). */
+.ecran--journee.ecran--stock {
+  position: relative;
+  justify-content: center;
+}
+
+.ecran--journee > .stock {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+}
+
+@media (max-width: 1199px) {
+  .ecran--journee > .stock {
+    width: min(420px, calc(100% - 32px));
+  }
+
+  .ecran--journee .stock__liste {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 899px) {
+  .ecran--journee.ecran--stock {
+    flex-direction: row;
+    align-items: flex-end;
+  }
+
+  .ecran--journee > .stock {
+    right: 16px;
+    width: auto;
   }
 }
