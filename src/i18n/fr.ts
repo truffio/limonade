@@ -119,6 +119,7 @@ export const fr = {
   magasin: {
     paquet: (quantite: number, unite: string) => `Paquet de ${quantite} ${unite}`,
     enStock: (n: number) => `En stock : ${n}`,
+    paquets: 'Paquets',
     pourrissent: (n: number) => `⚠️ ${plural(n, 'citron pourrira', 'citrons pourriront')} ce soir`,
     hier: (prix: string) => `hier ${prix}`,
     tendance: { hausse: '🔺', baisse: '🔻', stable: '➖' },
@@ -153,7 +154,7 @@ export const fr = {
     tuAs: 'Tu as',
     manque: 'Il en manque ! Passe au magasin.',
     gobeletsLimite: (gobelets: number) =>
-      `⚠️ Tu n'as que ${plural(gobelets, 'gobelet', 'gobelets')} : tu ne pourras pas vendre plus de ${plural(gobelets, 'verre', 'verres')}.`,
+      `⚠️ Avec ${plural(gobelets, 'gobelet', 'gobelets')}, tu vends ${plural(gobelets, 'verre', 'verres')} au plus.`,
     verresPrets: (n: number) => `Tu vas préparer ${plural(n, 'verre', 'verres')}.`,
     prix: 'Prix d’un verre',
     coutVerre: (cout: string) => `Un verre te coûte environ ${cout} à fabriquer.`,
@@ -299,7 +300,7 @@ export const fr = {
     magasin: (lemons: number, sugar: number, ice: number, cups: number) =>
       `Achète tes ingrédients avec les boutons +. Pour 2 pichets, il te faut ${lemons} citrons, ${sugar} cuillères de sucre, ${ice} glaçons et ${cups} gobelets. Puis appuie sur « Acheter ».`,
     recette:
-      'Choisis ta recette, le nombre de pichets et le prix d’un verre. Regarde combien coûte un verre : vends-le plus cher pour gagner de l’argent ! Puis ouvre ton stand.',
+      'Choisis ta recette, tes pichets et ton prix : vends un verre plus cher qu’il ne te coûte ! Puis ouvre ton stand.',
     bilan:
       'Bravo, ta première journée est finie ! Le bénéfice te dit si tu as gagné de l’argent. Lis mes conseils en bas pour faire encore mieux demain.',
   },
