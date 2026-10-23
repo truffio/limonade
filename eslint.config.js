@@ -13,13 +13,18 @@ export default tseslint.config(
     // The simulation core must stay pure (ARCHITECTURE.md §1, §3).
     files: ['src/core/**/*.ts'],
     rules: {
-      'no-restricted-imports': [
+      '@typescript-eslint/no-restricted-imports': [
         'error',
         {
           patterns: [
             {
               group: ['**/app/**', '**/ui/**', '**/scene/**', '**/i18n/**', 'three', 'three/**'],
               message: 'core/ must stay pure: no DOM, no three.js, no UI or text.',
+            },
+            {
+              group: ['**/config/**', 'zod'],
+              allowTypeImports: true,
+              message: 'core/ may only import config types; the validated config is passed in.',
             },
           ],
         },

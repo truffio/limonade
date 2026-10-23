@@ -96,6 +96,8 @@ const supply = z
     maximum_price_per_package: money,
     daily_volatility: probability,
     daily_drift: z.number().min(-0.5).max(0.5),
+    /** Fraction of the gap to the starting price closed each day (0 = pure random walk). */
+    mean_reversion: probability,
   })
   .superRefine((s, ctx) => {
     const min = s.minimum_price_per_package;

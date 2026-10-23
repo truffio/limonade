@@ -230,8 +230,8 @@ interface DayRecord {          // one row of history (spec §8)
   revenue: Cents;
   supplySpending: Cents;
   cashChange: Cents;           // revenue − supplySpending (NOT profit)
-  costOfGoodsUsed: Cents;      // FIFO cost of ingredients put in pitchers + cups sold
-  wasteCost: Cents;            // cost of spoiled lemons + melted ice
+  costOfGoodsUsed: Cents;      // cost of the servings and cups that were sold
+  wasteCost: Cents;            // discarded lemonade + melted ice + spoiled lemons
   profit: Cents;               // revenue − costOfGoodsUsed − wasteCost  (« Bénéfice »)
   waste: { servingsDiscarded: number; iceMelted: number; lemonsSpoiled: number };
   feedback: FeedbackCode[];
@@ -274,7 +274,7 @@ All tunable numbers in this section come from config. The formulas are a startin
 - **Forecast**: generated from the *actual* weather plus noise:
   - `forecast.T = actual.T + normal(0, forecastTempSd)`
   - `forecast.cloud` matches the actual cloud cover with probability `forecastCloudAccuracy`
-  - `rainChance` is a calibrated probability, so that "40 %" really means it rains about 40 % of the time on those days
+  - `rainChance` is a calibrated probability, so that "40 %" really means it rains about 40 % of the time on those days. The forecaster gets a hint about rain that is right with probability `cloud_accuracy`, then reports the Bayes posterior given the forecast sky's usual rain rate
   - `trafficOutlook` comes from running the expected‑traffic formula (§7.5) on the *forecast*, then applying the config thresholds.
 
 ### 7.3 Market prices (`market.ts`)
@@ -319,11 +319,12 @@ At most **3 messages** are shown, ranked by importance. They are built from coun
 - `GASPILLAGE` → « Tu as jeté 6 verres de limonade. »
 
 ### 7.8 Accounting (`accounting.ts`)
-- **Cost of goods used**: the FIFO cost of the lemons in the pitchers, plus the average cost of the sugar and ice in the pitchers, plus the average cost of each cup sold. Lemonade that is made but not sold is included, because its ingredients were used up.
-- **Waste cost**: the cost of lemon batches that spoiled, plus the cost of ice that melted unused.
+- **Prepared lemonade is a stock line**: preparing moves the ingredient cost (lemons FIFO, sugar and ice at average cost) into servings of lemonade.
+- **Cost of goods used**: the cost of each serving sold plus each cup sold.
+- **Waste cost**: lemonade discarded at closing, ice that melted unused, and lemon batches that spoiled.
 - **Profit** = revenue − cost of goods used − waste cost. Sugar and cups left in stock are not counted, because they can still be used later.
 - **Average unit costs** (sugar, ice, cups) are updated as a weighted average after each purchase. Lemons keep their per‑batch cost.
-- The game totals `totalProfit` over the whole game. Final cash − starting cash = total profit + value of the stock still owned. The end screen shows this equation in kid‑friendly words.
+- The game totals `totalProfit` over the whole game. Stock bought and still owned lowers cash but not profit, so **final cash = starting cash + total profit − (stock value now − stock value at the start)**. The end screen shows this equation in kid‑friendly words.
 - Tests check that the books always balance: `cashChange` summed over all days equals final cash − starting cash.
 
 ### 7.9 End conditions (`endConditions.ts`)
@@ -434,9 +435,9 @@ The total profit is shown green when positive and red when negative, always with
 | **Magasin** | One card per supply: icon, « Paquet de 6 citrons », price with trend arrow (🔺 / 🔻 / ➖ with yesterday's price), stock owned, a stepper for packages, and the line total. A news banner explains big changes (« 🍋 Belle récolte : les citrons sont moins chers ! »). Cart total compared with cash, and an « Acheter » button. A 📈 mini price-history chart per supply opens in a modal |
 | **Recette** | Three big sliders with pictures (🍋 / 🍬 / 🧊 per pitcher). A cartoon pitcher fills and changes color as the recipe changes; no score is shown. A pitchers stepper and a « Ce qu'il te faut / Ce que tu as » checklist with ✅ / ❌. A warning « ⚠️ Tu n'as que 20 gobelets : tu ne pourras vendre que 20 verres. » Price stepper with a live **« Un verre te coûte environ 0,38 $ à fabriquer »** hint next to the selling price, so the kid sees the margin per cup. Big « Ouvrir le stand ! » button |
 | **Journée** | Mostly the 3D scene. Small overlay: day clock progress bar, « Verres vendus : 12 », live cash, speed buttons |
-| **Bilan** | Big figures: « Clients venus », « Verres vendus », « Clients déçus » (missed sales), « Recette du jour », « Dépenses au magasin », « Variation de caisse ». The **« Bénéfice du jour »** is the headline of the screen: a large number with a simple stacked bar showing « Ventes − Ingrédients utilisés − Gaspillage = Bénéfice ». A « Pourquoi ce n'est pas pareil que la caisse ? » ❓ button explains with the mascot. Then « Gaspillage » (🗑️ verres jetés, 🧊 glaçons fondus, 🍋 citrons pourris), « Prévu vs Réel » weather side by side, up to 3 mascot feedback messages, and the buttons « Historique » and « Jour suivant ➜ » |
+| **Bilan** | Big figures: « Clients venus », « Verres vendus », « Clients déçus » (missed sales), « Recette du jour », « Dépenses au magasin », « Variation de caisse ». The **« Bénéfice du jour »** is the headline of the screen: a large number with a simple stacked bar showing « Ventes − Coût des verres vendus − Gaspillage = Bénéfice ». A « Pourquoi ce n'est pas pareil que la caisse ? » ❓ button explains with the mascot. Then « Gaspillage » (🗑️ verres jetés, 🧊 glaçons fondus, 🍋 citrons pourris), « Prévu vs Réel » weather side by side, up to 3 mascot feedback messages, and the buttons « Historique » and « Jour suivant ➜ » |
 | **Historique** | A simple table with one row per day (météo prévue/réelle, prix, recette, verres vendus, bénéfice, caisse), plus small line charts of cash, profit per day, and supply prices (lightweight SVG drawn by hand, no chart library) |
-| **Fin** | Score « 💰 Tu termines avec 48,20 $ ! », then **« 📈 Bénéfice total : +28,20 $ »** with the kid‑friendly equation « Caisse de départ + Bénéfice + Stock restant = Caisse finale ». Also the totals summary (spec §9), best day by profit, the day‑by‑day table, a fun title by score (« Apprenti citronnier », « Roi de la limonade »…), the early‑end explanation if needed, and « Rejouer » |
+| **Fin** | Score « 💰 Tu termines avec 48,20 $ ! », then **« 📈 Bénéfice total : +28,20 $ »** with the kid‑friendly equation « Caisse de départ + Bénéfice = Caisse finale + Stock qu'il te reste ». Also the totals summary (spec §9), best day by profit, the day‑by‑day table, a fun title by score (« Apprenti citronnier », « Roi de la limonade »…), the early‑end explanation if needed, and « Rejouer » |
 
 ### 10.4 Vocabulary (consistent French terms)
 
