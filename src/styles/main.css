@@ -1,0 +1,114 @@
+:root {
+  --citron: #ffd93d;
+  --feuille: #6bcb77;
+  --feuille-fonce: #3f9a4c;
+  --ciel: #4d96ff;
+  --corail: #ff6b6b;
+  --creme: #fff8e7;
+  --texte: #2b2b2b;
+  --ombre: 0 6px 0 rgb(0 0 0 / 0.15);
+  --rayon: 24px;
+
+  font-family: 'Fredoka', system-ui, sans-serif;
+  font-size: 18px;
+  color: var(--texte);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  overflow: hidden;
+  background: #bfe3ff;
+}
+
+#scene {
+  position: fixed;
+  inset: 0;
+}
+
+#scene canvas {
+  display: block;
+}
+
+.scene--fallback {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 16px;
+  background: linear-gradient(#bfe3ff 65%, var(--feuille) 65%);
+  font-size: 0.9rem;
+}
+
+/* UI overlay: lets clicks reach nothing but the cards, so the scene stays visible. */
+#ui {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  pointer-events: none;
+}
+
+.card {
+  pointer-events: auto;
+  width: min(100%, 520px);
+  padding: 32px;
+  border-radius: var(--rayon);
+  background: var(--creme);
+  box-shadow: var(--ombre);
+  text-align: center;
+}
+
+.card h1 {
+  margin: 0 0 12px;
+  font-size: 2rem;
+  font-weight: 600;
+}
+
+.titre-jeu {
+  font-size: 2.4rem;
+}
+
+.btn {
+  min-height: 56px;
+  padding: 12px 28px;
+  border: none;
+  border-radius: 999px;
+  font: inherit;
+  font-weight: 600;
+  font-size: 1.2rem;
+  cursor: pointer;
+  box-shadow: var(--ombre);
+  transition: transform 0.1s;
+}
+
+.btn:active {
+  transform: translateY(4px);
+  box-shadow: 0 2px 0 rgb(0 0 0 / 0.15);
+}
+
+.btn:focus-visible {
+  outline: 4px solid var(--ciel);
+  outline-offset: 3px;
+}
+
+.btn--primary {
+  background: var(--feuille);
+  color: white;
+}
+
+.btn--primary:hover {
+  background: var(--feuille-fonce);
+}
+
+.btn--large {
+  min-height: 72px;
+  padding: 16px 40px;
+  font-size: 1.5rem;
+}
