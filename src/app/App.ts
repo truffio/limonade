@@ -8,7 +8,15 @@ import { screens } from '../ui/screens';
 import type { AppState, ScreenContext, ScreenId } from '../ui/screens/types';
 import { h } from '../ui/dom';
 import { EventBus, type GameEvents } from './events';
-import { clearSave, loadGame, loadPreferences, saveGame, savePreferences } from './persistence';
+import {
+  clearSave,
+  DEFAULT_PREFERENCES,
+  loadGame,
+  loadPreferences,
+  type Preferences,
+  saveGame,
+  savePreferences,
+} from './persistence';
 import { createStore, type Store } from './store';
 
 export const PHASE_SCREEN: Record<Phase, ScreenId> = {
@@ -31,13 +39,18 @@ const WITHOUT_TOP_BAR: ReadonlySet<ScreenId> = new Set(['accueil', 'journee']);
 
 const TOAST_MS = 2500;
 
-export function initialState(conseils = true): AppState {
+export function initialState(preferences: Preferences = DEFAULT_PREFERENCES): AppState {
   return {
     screen: 'accueil',
     game: null,
     cart: {},
-    ui: { dureeChoisie: null, aideOuverte: false, explicationOuverte: false, conseils },
+    ui: { dureeChoisie: null, aideOuverte: false, explicationOuverte: false, ...preferences },
   };
+}
+
+function preferencesOf(state: AppState): Preferences {
+  const { conseils, son, musique, volume } = state.ui;
+  return { conseils, son, musique, volume };
 }
 
 export interface AppOptions {
@@ -61,7 +74,7 @@ export class App {
     options: AppOptions = {},
   ) {
     this.configFingerprint = options.configFingerprint ?? 'dev';
-    this.store = createStore(initialState(loadPreferences().conseils));
+    this.store = createStore(initialState(loadPreferences()));
   }
 
   start(): void {
@@ -88,12 +101,12 @@ export class App {
       if (finished.ok) game = finished.state;
     }
     const screen = PHASE_SCREEN[game.phase];
-    this.store.set({ ...initialState(this.store.get().ui.conseils), screen, game });
+    this.store.set({ ...initialState(preferencesOf(this.store.get())), screen, game });
     this.events.emit('screen_change', { from: 'accueil', to: screen });
   }
 
   private persist(state: AppState): void {
-    savePreferences({ conseils: state.ui.conseils });
+    savePreferences(preferencesOf(state));
     if (!state.game) return;
     if (state.game.phase === 'FIN') clearSave();
     else saveGame(state.game, this.configFingerprint);
@@ -113,7 +126,7 @@ export class App {
     const seed = (Date.now() ^ Math.floor(Math.random() * 0x7fffffff)) | 0;
     const game = newGame(this.config, { seed, days });
     this.store.set({
-      ...initialState(this.store.get().ui.conseils),
+      ...initialState(preferencesOf(this.store.get())),
       screen: PHASE_SCREEN[game.phase],
       game,
     });
@@ -177,7 +190,7 @@ export class App {
       startGame: (days) => this.startGame(days),
       savedGame: () => this.savedGame(),
       resume: () => this.resume(),
-      quit: () => this.store.set(initialState(this.store.get().ui.conseils)),
+      quit: () => this.store.set(initialState(preferencesOf(this.store.get()))),
       toast: (text, tone) => this.toast(text, tone),
       click: (id) => this.events.emit('button_click', { id }),
       onCleanup: (fn) => this.cleanups.push(fn),

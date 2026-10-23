@@ -60,6 +60,11 @@ export function renderTopBar(ctx: ScreenContext): HTMLElement {
           h('small', null, `(${fr.hud.prevision})`),
         )
       : null,
+    button(ctx.state.ui.son ? '🔊' : '🔇', () => ctx.setUi({ son: !ctx.state.ui.son }), {
+      variant: 'ghost',
+      label: ctx.state.ui.son ? fr.hud.couperSon : fr.hud.remettreSon,
+      focusKey: 'barre-son',
+    }),
     showHistory
       ? button(fr.commun.historique, () => ctx.goTo('historique'), {
           variant: 'ghost',

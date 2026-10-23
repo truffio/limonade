@@ -65,14 +65,18 @@ describe('save file', () => {
       throw new Error('QuotaExceededError');
     });
     expect(() => saveGame(newGame(cfg, { seed: 1 }), 'abc')).not.toThrow();
-    expect(() => savePreferences({ conseils: false })).not.toThrow();
+    expect(() =>
+      savePreferences({ conseils: false, son: true, musique: false, volume: 3 }),
+    ).not.toThrow();
     spy.mockRestore();
   });
 
   it('remembers preferences, with tips on by default', () => {
-    expect(loadPreferences()).toEqual({ conseils: true });
-    savePreferences({ conseils: false });
-    expect(loadPreferences()).toEqual({ conseils: false });
+    expect(loadPreferences()).toEqual({ conseils: true, son: true, musique: false, volume: 3 });
+    savePreferences({ conseils: false, son: false, musique: true, volume: 5 });
+    expect(loadPreferences()).toEqual({ conseils: false, son: false, musique: true, volume: 5 });
+    localStorage.setItem('limonade.preferences.v1', JSON.stringify({ volume: 99, son: 'oui' }));
+    expect(loadPreferences()).toEqual({ conseils: true, son: true, musique: false, volume: 3 });
   });
 
   it('fingerprints configs stably', () => {
@@ -147,7 +151,7 @@ describe('App: first-day tutorial', () => {
     findButton(root, 'Retour à l’accueil').click();
     findButton(root, 'Conseils de Citronnelle : oui').click();
     expect(root.textContent).toContain('Conseils de Citronnelle : non');
-    expect(loadPreferences()).toEqual({ conseils: false });
+    expect(loadPreferences().conseils).toBe(false);
 
     findButton(root, 'Continuer la partie').click();
     expect(root.textContent).not.toContain('Étape 2 sur 4');

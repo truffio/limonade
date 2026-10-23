@@ -533,7 +533,7 @@ This tool runs thousands of headless games with simple bot strategies (« pruden
 7. **Polish**: mascot tutorial, animations and transitions, responsive tablet layout, autosave.
 8. **Playtest with kids**: watch and adjust wording, then rebalance the config.
 
-**Sound** is a separate epic: [`docs/epics/EPIC-son.md`](docs/epics/EPIC-son.md). This architecture only prepares for it: `DayPlayer` and the UI publish typed events (`sale`, `missed`, `rain_start`, `button_click`, `day_end`…) on a small event bus (`app/events.ts`), so the sound module can later subscribe to them without changing game code.
+**Sound** is a separate epic, now done: [`docs/epics/EPIC-son.md`](docs/epics/EPIC-son.md). `src/audio/AudioManager.ts` only listens: `DayPlayer` and the UI publish typed events (`sale`, `missed`, `rain_start`, `button_click`, `day_end`…) on a small event bus (`app/events.ts`), so the sound module can later subscribe to them without changing game code.
 
 ---
 
