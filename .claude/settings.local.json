@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(claude config *)",
+      "Bash(gh auth *)",
+      "Bash(gh issue *)",
+      "Bash(gh label *)",
+      "Bash(gh project *)",
+      "Bash(gh repo *)",
+      "Bash(git init *)",
+      "Bash(git remote *)",
+      "Bash(/usr/bin/git -C /Users/martin/Documents/Dev/limonade init)",
+      "Bash(/usr/bin/git -C /Users/martin/Documents/Dev/limonade remote add origin https://github.com/truffio/limonade.git)",
+      "Bash(xcode-select -p)",
+      "Bash(git --version)",
+      "Bash(sudo xcode-select *)"
+    ]
+  }
+}
