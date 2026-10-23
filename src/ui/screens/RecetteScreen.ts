@@ -4,7 +4,7 @@ import { checkPreparation, type Ingredient } from '../../core/preparation';
 import type { DayPlan } from '../../core/types';
 import { money } from '../../i18n/format';
 import { fr } from '../../i18n/fr';
-import { actions, button, mascot, screenTitle, stepper } from '../components';
+import { actions, button, mascot, screenTitle, stepper, tutorialTip } from '../components';
 import { pitcherPreview } from '../components/pitcher';
 import { h } from '../dom';
 import type { Screen } from './types';
@@ -95,6 +95,7 @@ export const RecetteScreen: Screen = {
       'section',
       { class: 'panneau' },
       screenTitle(fr.ecrans.recette),
+      tutorialTip(ctx, 3, fr.tutoriel.recette),
       h(
         'div',
         { class: 'recette' },

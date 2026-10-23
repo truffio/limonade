@@ -26,6 +26,7 @@ describe('App (full flow in French)', () => {
   let app: App;
 
   beforeEach(() => {
+    localStorage.clear();
     document.body.innerHTML = '<main id="ui"></main>';
     root = document.getElementById('ui') as HTMLElement;
     app = new App(root, cfg);

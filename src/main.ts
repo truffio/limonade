@@ -4,6 +4,7 @@ import './styles/main.css';
 
 import rawConfig from '../config/game-config.json';
 import { App } from './app/App';
+import { fingerprint } from './app/persistence';
 import { describeIssue, loadConfig } from './config/loadConfig';
 import { fr } from './i18n/fr';
 import { GameScene } from './scene/GameScene';
@@ -34,7 +35,7 @@ try {
 
 const result = loadConfig(rawConfig);
 if (result.ok) {
-  const app = new App(uiRoot, result.config);
+  const app = new App(uiRoot, result.config, { configFingerprint: fingerprint(rawConfig) });
   if (gameScene) new SceneDirector(app, gameScene);
   app.start();
 } else {

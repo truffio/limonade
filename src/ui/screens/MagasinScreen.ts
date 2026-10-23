@@ -4,7 +4,7 @@ import type { GameState, SupplyId } from '../../core/types';
 import { SUPPLIES } from '../../core/types';
 import { money } from '../../i18n/format';
 import { fr } from '../../i18n/fr';
-import { actions, button, mascot, screenTitle, stepper } from '../components';
+import { actions, button, mascot, screenTitle, stepper, tutorialTip } from '../components';
 import { lineChart } from '../components/lineChart';
 import { h } from '../dom';
 import type { Screen, ScreenContext } from './types';
@@ -118,6 +118,16 @@ export const MagasinScreen: Screen = {
       'section',
       { class: 'panneau' },
       screenTitle(fr.ecrans.magasin),
+      tutorialTip(
+        ctx,
+        2,
+        fr.tutoriel.magasin(
+          2 * ctx.cfg.recipe.lemons_per_pitcher.default,
+          2 * ctx.cfg.recipe.sugar_per_pitcher.default,
+          2 * ctx.cfg.recipe.ice_per_pitcher.default,
+          2 * ctx.cfg.recipe.servings_per_pitcher,
+        ),
+      ),
       news.length > 0
         ? h(
             'div',

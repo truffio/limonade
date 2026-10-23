@@ -16,12 +16,22 @@ type Updater = (dt: number, elapsed: number) => void;
 /** Longest frame step, so a tab returning from background doesn't jump animations. */
 const MAX_DT = 0.1;
 
+/** Vertical field of view on wide screens; tall screens get a wider one so the street stays in view. */
+const BASE_FOV = 35;
+const MAX_FOV = 62;
+const WIDE_ASPECT = 1.2;
+
+export function fovForAspect(aspect: number): number {
+  if (aspect >= WIDE_ASPECT) return BASE_FOV;
+  return Math.min(MAX_FOV, BASE_FOV * (WIDE_ASPECT / aspect) ** 0.6);
+}
+
 /** Owns the three.js renderer, camera, lights and render loop (ARCHITECTURE.md §9). */
 export class SceneManager {
   readonly scene = new Scene();
   readonly sunLight = new DirectionalLight(0xffffff, 1.6);
   readonly ambient = new HemisphereLight(0xffffff, COLORS.feuille, 1.2);
-  private readonly camera = new PerspectiveCamera(35, 1, 0.1, 100);
+  private readonly camera = new PerspectiveCamera(BASE_FOV, 1, 0.1, 100);
   private readonly renderer: WebGLRenderer;
   private readonly timer = new Timer();
   private readonly updaters = new Set<Updater>();
@@ -99,6 +109,7 @@ export class SceneManager {
     const { clientWidth: width, clientHeight: height } = this.container;
     if (width === 0 || height === 0) return;
     this.camera.aspect = width / height;
+    this.camera.fov = fovForAspect(this.camera.aspect);
     const { x, y } = this.focusShift;
     if (x > 0 || y > 0) {
       // Render a slightly larger view and look at the part away from the panel.

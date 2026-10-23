@@ -1,5 +1,6 @@
 import { fr } from '../../i18n/fr';
 import { h, type Child } from '../dom';
+import type { ScreenContext } from '../screens/types';
 
 export interface ButtonOptions {
   variant?: 'primary' | 'secondary' | 'ghost';
@@ -113,4 +114,40 @@ export function screenTitle(text: string): HTMLElement {
 /** Bottom row of navigation buttons. */
 export function actions(...buttons: (HTMLElement | null)[]): HTMLElement {
   return h('div', { class: 'ecran__actions' }, buttons);
+}
+
+/**
+ * Citronnelle's step-by-step tip, shown on the first day of a game while
+ * tips are on (ARCHITECTURE.md §10.1: the first day works as a guided tutorial).
+ */
+export function tutorialTip(ctx: ScreenContext, step: number, text: string): HTMLElement | null {
+  const game = ctx.state.game;
+  if (!ctx.state.ui.conseils || !game || game.day !== 1) return null;
+  const tip = mascot(h('strong', null, fr.tutoriel.etape(step)), text);
+  tip.classList.add('mascotte--tuto');
+  return tip;
+}
+
+function prefersReducedMotion(): boolean {
+  return typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+}
+
+/** Counts a number up from zero, for a bit of excitement on the report. */
+export function countUp(
+  el: HTMLElement,
+  to: number,
+  format: (value: number) => string,
+  ms = 900,
+): void {
+  el.textContent = format(to);
+  if (prefersReducedMotion() || typeof requestAnimationFrame !== 'function') return;
+  const start = performance.now();
+  const step = (now: number) => {
+    const f = Math.min(1, (now - start) / ms);
+    const eased = 1 - (1 - f) ** 3;
+    el.textContent = format(Math.round(to * eased));
+    if (f < 1 && el.isConnected) requestAnimationFrame(step);
+  };
+  el.textContent = format(0);
+  requestAnimationFrame(step);
 }

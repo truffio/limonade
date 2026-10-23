@@ -43,6 +43,8 @@ export const fr = {
   } satisfies Record<ScreenId, string>,
   accueil: {
     bienvenue: 'Salut ! Moi, c’est Citronnelle. On vend la meilleure limonade du quartier ?',
+    continuer: (jour: number, total: number) => `▶ Continuer la partie (jour ${jour} / ${total})`,
+    conseils: (oui: boolean) => `💡 Conseils de Citronnelle : ${oui ? 'oui' : 'non'}`,
     duree: "Combien de jours d'été ?",
     dureeExacte: 'Ou choisis un nombre de jours',
     jours: (n: number) => plural(n, 'jour', 'jours'),
@@ -70,6 +72,8 @@ export const fr = {
     benefice: 'Bénéfice',
     prevision: 'prévision',
     stock: 'Ton stock',
+    accueil: 'Retour à l’accueil (ta partie est sauvegardée)',
+    sauvegarde: 'Partie sauvegardée ! 💾',
   },
   fournitures: {
     lemons: { nom: 'Citrons', icone: '🍋' },
@@ -281,5 +285,16 @@ export const fr = {
   },
   mascotte: {
     nom: 'Citronnelle',
+  },
+  tutoriel: {
+    etape: (n: number) => `Étape ${n} sur 4`,
+    meteo:
+      'Voici la météo de demain. Quand il fait chaud et beau, beaucoup de clients ont soif ! Quand il pleut, il y en a moins.',
+    magasin: (lemons: number, sugar: number, ice: number, cups: number) =>
+      `Achète tes ingrédients avec les boutons +. Pour 2 pichets, il te faut ${lemons} citrons, ${sugar} cuillères de sucre, ${ice} glaçons et ${cups} gobelets. Puis appuie sur « Acheter ».`,
+    recette:
+      'Choisis ta recette, le nombre de pichets et le prix d’un verre. Regarde combien coûte un verre : vends-le plus cher pour gagner de l’argent ! Puis ouvre ton stand.',
+    bilan:
+      'Bravo, ta première journée est finie ! Le bénéfice te dit si tu as gagné de l’argent. Lis mes conseils en bas pour faire encore mieux demain.',
   },
 } as const;

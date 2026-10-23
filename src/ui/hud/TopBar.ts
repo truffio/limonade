@@ -18,6 +18,14 @@ export function renderTopBar(ctx: ScreenContext): HTMLElement {
   return h(
     'header',
     { class: 'barre' },
+    button(
+      '🏠',
+      () => {
+        ctx.quit();
+        ctx.toast(fr.hud.sauvegarde);
+      },
+      { variant: 'ghost', label: fr.hud.accueil, focusKey: 'barre-accueil' },
+    ),
     h('span', { class: 'barre__item barre__jour' }, '📅 ', fr.hud.jour(game.day, game.totalDays)),
     h(
       'span',
